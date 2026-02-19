@@ -1035,12 +1035,19 @@ export class ExamsService {
         return true;
       });
 
-      // Yüklerine göre sırala (önce günlük yük, sonra toplam yük)
+      // Sıralama: 1) Aynı bölüm öncelikli, 2) Günlük yük, 3) Toplam yük
+      const examBolumId = exam.ders?.bolumId;
       musaitGozetmenler.sort((a, b) => {
+        // Önce aynı bölümden olanları öne al
+        const aAyniBolum = a.bolumId === examBolumId ? 0 : 1;
+        const bAyniBolum = b.bolumId === examBolumId ? 0 : 1;
+        if (aAyniBolum !== bAyniBolum) {
+          return aAyniBolum - bAyniBolum;
+        }
+
+        // Aynı bölüm durumu eşitse, günlük yüke göre sırala
         const aGunlukYuk = gozetmenGunlukYukleri[a.id]?.[examDate] ?? 0;
         const bGunlukYuk = gozetmenGunlukYukleri[b.id]?.[examDate] ?? 0;
-
-        // Önce günlük yüke göre sırala
         if (aGunlukYuk !== bGunlukYuk) {
           return aGunlukYuk - bGunlukYuk;
         }
