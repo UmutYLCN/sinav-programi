@@ -38,7 +38,7 @@ export function AddCourseForm({ open, onOpenChange, initialData }: AddCourseForm
       setSinif(initialData.sinif ?? 1);
       setDonem(initialData.donem ?? 'guz');
       setBolumId(initialData.bolumId);
-      setKredi(initialData.kredi);
+      setKredi(initialData.kredi ?? undefined);
       setOgrenciKapasitesi(initialData.ogrenciKapasitesi ?? undefined);
     } else {
       setKod('');
@@ -71,9 +71,9 @@ export function AddCourseForm({ open, onOpenChange, initialData }: AddCourseForm
         donem,
         bolumId,
       };
-      
+
       console.log('🔍 FORM SUBMIT - İlk DTO:', JSON.stringify(dto, null, 2));
-      
+
       // Kredi için: değer varsa ekle, yoksa undefined bırak (güncellemede değişmez)
       if (kredi !== undefined && kredi !== null && !isNaN(kredi) && kredi > 0) {
         dto.kredi = kredi;
@@ -85,7 +85,7 @@ export function AddCourseForm({ open, onOpenChange, initialData }: AddCourseForm
           dto.kredi = null;
         }
       }
-      
+
       // Öğrenci kapasitesi için: geçerli değer varsa ekle
       console.log('🔍 FORM SUBMIT - Öğrenci kapasitesi kontrolü:', {
         ogrenciKapasitesi,

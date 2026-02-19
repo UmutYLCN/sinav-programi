@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import type { Course, Donem } from '@sinav/shared';
+export type { Course };
 
 type CoursesResponse = {
   veriler: Course[];
@@ -14,7 +15,7 @@ export const fetchCourses = async (params: { bolumId?: string } = {}) => {
   if (params.bolumId) {
     queryParams.bolumId = params.bolumId;
   }
-  
+
   const { data } = await apiClient.get<CoursesResponse>('/courses', {
     params: queryParams,
   });
@@ -77,10 +78,10 @@ export const importCourses = async (kayitlar: ImportCourseDto[]) => {
   console.log('🔍 SERVICE - İlk kayıt keys:', kayitlar[0] ? Object.keys(kayitlar[0]) : 'yok');
   console.log('🔍 SERVICE - İlk kayıt kod:', kayitlar[0]?.kod);
   console.log('🔍 SERVICE - İlk kayıt bolumKod:', kayitlar[0]?.bolumKod);
-  
+
   const requestBody = { kayitlar };
   console.log('🔍 SERVICE - Request body:', JSON.stringify(requestBody, null, 2));
-  
+
   const { data } = await apiClient.post('/courses/import', requestBody);
   console.log('🔍 SERVICE - API yanıtı:', JSON.stringify(data, null, 2));
   return data;

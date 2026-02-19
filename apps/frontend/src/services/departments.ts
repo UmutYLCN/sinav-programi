@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import type { Department } from '@sinav/shared';
+export type { Department };
 
 type DepartmentsResponse = {
   veriler: Department[];
@@ -14,7 +15,7 @@ export const fetchDepartments = async (params?: { fakulteId?: string }) => {
   if (params?.fakulteId) {
     queryParams.fakulteId = params.fakulteId;
   }
-  
+
   const { data } = await apiClient.get<DepartmentsResponse>('/departments', {
     params: queryParams,
   });
@@ -66,22 +67,22 @@ export const importDepartments = async (kayitlar: ImportDepartmentItemDto[]) => 
   console.log('🔍 SERVICE DEBUG - Kayıtlar (raw):', kayitlar);
   console.log('🔍 SERVICE DEBUG - Kayıtlar (JSON):', JSON.stringify(kayitlar, null, 2));
   console.log('🔍 SERVICE DEBUG - İlk 3 kayıt:', kayitlar?.slice(0, 3));
-  
+
   if (!kayitlar) {
     console.error('🔍 SERVICE ERROR - kayitlar null/undefined!');
     throw new Error('İçe aktarılacak veri bulunamadı.');
   }
-  
+
   if (!Array.isArray(kayitlar)) {
     console.error('🔍 SERVICE ERROR - kayitlar Array değil!', typeof kayitlar, kayitlar);
     throw new Error('Geçersiz veri formatı: Array bekleniyor.');
   }
-  
+
   if (kayitlar.length === 0) {
     console.error('🔍 SERVICE ERROR - kayitlar boş array!');
     throw new Error('İçe aktarılacak veri bulunamadı.');
   }
-  
+
   // Her kaydı kontrol et
   kayitlar.forEach((kayit, index) => {
     console.log(`🔍 SERVICE DEBUG - Kayıt ${index + 1} kontrol:`, JSON.stringify(kayit, null, 2));
@@ -104,10 +105,10 @@ export const importDepartments = async (kayitlar: ImportDepartmentItemDto[]) => 
       throw new Error(`Satır ${index + 1}: "ad" veya "kod" eksik. Veri: ${JSON.stringify(kayit)}`);
     }
   });
-  
+
   console.log('🔍 SERVICE DEBUG - Tüm kontroller geçti, API çağrısı yapılıyor...');
   console.log('🔍 SERVICE DEBUG - Gönderilecek veri:', JSON.stringify({ kayitlar }, null, 2));
-  
+
   const { data } = await apiClient.post('/departments/import', { kayitlar });
   console.log('🔍 SERVICE DEBUG - API yanıtı:', data);
   return data;
