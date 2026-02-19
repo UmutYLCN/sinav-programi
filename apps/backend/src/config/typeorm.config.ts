@@ -48,7 +48,7 @@ export const typeOrmModuleFactory = (
     password: configService.get('DATABASE_PASSWORD', { infer: true }),
     database: configService.get('DATABASE_NAME', { infer: true }),
     entities,
-    synchronize: false, // Manuel migration kullanıyoruz
+    synchronize: false, // Development modunda tablolar otomatik oluşsun
     migrationsTableName: 'migrations',
     migrations: ['dist/database/migrations/*.js'],
     timezone,
@@ -70,7 +70,7 @@ export const createDataSourceOptions = (
     password: config.DATABASE_PASSWORD,
     database: config.DATABASE_NAME,
     entities,
-    synchronize: false, // Manuel migration kullanıyoruz
+    synchronize: false, // Development modunda tablolar otomatik oluşsun
     migrationsTableName: 'migrations',
     migrations: ['dist/database/migrations/*.js'],
     timezone: '+03:00', // Europe/Istanbul için UTC+3

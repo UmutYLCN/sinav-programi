@@ -23,8 +23,17 @@ export class CreateInstructorDto {
   @MaxLength(200, { message: 'E-posta en fazla 200 karakter olabilir.' })
   email: string;
 
-  @IsUUID('all', { message: 'Bölüm kimliği geçerli bir UUID olmalıdır.' })
-  bolumId: string;
+  @IsOptional()
+  @IsString({ message: 'Bölüm kimliği veya kodu metin olmalıdır.' })
+  bolumId?: string;
+
+  @IsOptional()
+  @IsString({ message: 'Bölüm kodu metin olmalıdır.' })
+  bolumKod?: string;
+
+  @IsOptional()
+  @IsString({ message: 'Bölüm adı metin olmalıdır.' })
+  bolumAd?: string;
 
   @IsOptional()
   @IsArray({ message: 'Roller dizi olmalıdır.' })

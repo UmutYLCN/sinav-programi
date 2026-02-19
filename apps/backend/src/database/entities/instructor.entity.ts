@@ -29,8 +29,7 @@ export class Instructor extends CoreEntity {
   @Column({
     type: 'json',
     name: 'roller',
-    nullable: false,
-    default: () => "'[]'",
+    nullable: true,
   })
   roller: KullaniciRol[];
 

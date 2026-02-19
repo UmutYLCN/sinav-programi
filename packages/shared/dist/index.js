@@ -39,6 +39,7 @@ __export(index_exports, {
   ExamGroupSchema: () => ExamGroupSchema,
   ExamInvigilatorRoleEnum: () => ExamInvigilatorRoleEnum,
   ExamInvigilatorSchema: () => ExamInvigilatorSchema,
+  ExamRoomSchema: () => ExamRoomSchema,
   ExamSchema: () => ExamSchema,
   ExamTurEnum: () => ExamTurEnum,
   FacultySchema: () => FacultySchema,
@@ -151,6 +152,7 @@ var CourseSchema = WithTimestampsSchema.extend({
   sinif: import_zod5.z.number().int().min(1).max(6),
   donem: DonemEnum,
   kredi: import_zod5.z.number().int().positive().nullable().optional(),
+  ogrenciKapasitesi: import_zod5.z.number().int().positive().nullable().optional(),
   bolumId: IdSchema,
   bolum: DepartmentSchema.optional()
 });
@@ -162,9 +164,7 @@ var RoomSchema = WithTimestampsSchema.extend({
   ad: import_zod6.z.string().min(1).max(150),
   bina: import_zod6.z.string().min(1).max(150),
   tip: import_zod6.z.enum(DERSLIK_TIPLERI),
-  kapasite: import_zod6.z.number().int().positive(),
-  fakulteId: IdSchema,
-  fakulte: FacultySchema.optional()
+  kapasite: import_zod6.z.number().int().positive()
 });
 
 // src/schemas/instructor.ts
@@ -198,6 +198,14 @@ var ExamInvigilatorSchema = WithTimestampsSchema.extend({
   gozetmen: InstructorSchema.optional()
 });
 
+// src/schemas/exam-room.ts
+var ExamRoomSchema = WithTimestampsSchema.extend({
+  id: IdSchema,
+  sinavId: IdSchema,
+  derslikId: IdSchema,
+  derslik: RoomSchema.optional()
+});
+
 // src/schemas/exam-conflict.ts
 var import_zod10 = require("zod");
 var ExamConflictTurEnum = import_zod10.z.enum([
@@ -228,13 +236,18 @@ var ExamSchema = WithTimestampsSchema.extend({
   baslangic: import_zod11.z.string().nullable().optional(),
   bitis: import_zod11.z.string().nullable().optional(),
   derslikId: IdSchema.nullable().optional(),
+  // Deprecated: Use derslikler instead
   derslik: RoomSchema.nullable().optional(),
+  // Deprecated: Use derslikler instead
+  derslikler: import_zod11.z.array(ExamRoomSchema).optional(),
   ogretimUyesiId: IdSchema.nullable().optional(),
   ogretimUyesi: InstructorSchema.nullable().optional(),
   ortakGrupId: IdSchema.nullable().optional(),
   ortakGrup: ExamGroupSchema.nullable().optional(),
   gozetmenler: import_zod11.z.array(ExamInvigilatorSchema).optional(),
   onayli: import_zod11.z.boolean().default(false),
+  cakismaOnayli: import_zod11.z.boolean().default(false),
+  // Kontrollü çakışma onayı
   notlar: import_zod11.z.string().nullable().optional(),
   teslimLinki: import_zod11.z.string().url().nullable().optional(),
   teslimTarihi: import_zod11.z.string().datetime().nullable().optional()
@@ -320,6 +333,7 @@ var InvigilatorLoadDetailSchema = import_zod14.z.object({
   ExamGroupSchema,
   ExamInvigilatorRoleEnum,
   ExamInvigilatorSchema,
+  ExamRoomSchema,
   ExamSchema,
   ExamTurEnum,
   FacultySchema,

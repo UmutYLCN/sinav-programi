@@ -51,7 +51,7 @@ export class ExamsService {
     @InjectRepository(InstructorUnavailability)
     private readonly unavailabilityRepository: Repository<InstructorUnavailability>,
     private readonly configService: ConfigService<EnvConfig, true>,
-  ) {}
+  ) { }
 
   async create(createExamDto: CreateExamDto) {
     const course = await this.courseRepository.findOne({
@@ -77,7 +77,7 @@ export class ExamsService {
 
     // Get room IDs before checking conflicts
     const derslikIds = createExamDto.derslikIds ?? (createExamDto.derslikId ? [createExamDto.derslikId] : []);
-    
+
     // Temporarily set derslikId for conflict checking if we have rooms
     if (derslikIds.length > 0 && !exam.derslikId) {
       exam.derslikId = derslikIds[0]; // Set first room ID for compatibility
@@ -89,7 +89,7 @@ export class ExamsService {
       undefined,
       derslikIds, // Pass room IDs explicitly
     );
-    
+
     // Eğer kontrollü çakışma onayı yoksa, kritik çakışmaları engelle
     if (!exam.cakismaOnayli) {
       const kritik = conflicts.find((c) => c.seviye === 'kritik');
@@ -244,7 +244,7 @@ export class ExamsService {
 
     await this.applyCommonRelations(sinav, updateExamDto);
     await this.applyTypeSpecificFields(sinav, updateExamDto);
-    
+
     // Update cakismaOnayli if provided
     if (updateExamDto.cakismaOnayli !== undefined) {
       sinav.cakismaOnayli = updateExamDto.cakismaOnayli;
@@ -260,14 +260,14 @@ export class ExamsService {
       (sinav.derslikler && sinav.derslikler.length > 0
         ? sinav.derslikler.map((dr) => dr.derslikId).filter(Boolean)
         : sinav.derslikId
-        ? [sinav.derslikId]
-        : []);
+          ? [sinav.derslikId]
+          : []);
 
     // Otomatik durum güncellemesi: Eğer tarih, saat, derslik ve gözetmen girildiyse durumu "taslak" yap
     if (sinav.tur === 'sinav' && sinav.durum === 'planlanmadi') {
       const hasTarih = sinav.tarih !== null && sinav.tarih !== undefined;
-      const hasSaat = sinav.baslangic !== null && sinav.baslangic !== undefined && 
-                      sinav.bitis !== null && sinav.bitis !== undefined;
+      const hasSaat = sinav.baslangic !== null && sinav.baslangic !== undefined &&
+        sinav.bitis !== null && sinav.bitis !== undefined;
       const hasDerslik = derslikIds.length > 0;
       const hasGozetmen = gozetmenIds.length > 0;
 
@@ -277,7 +277,7 @@ export class ExamsService {
     }
 
     const conflicts = await this.collectConflicts(sinav, gozetmenIds, sinav.id, derslikIds);
-    
+
     // Eğer kontrollü çakışma onayı yoksa, kritik çakışmaları engelle
     if (!sinav.cakismaOnayli) {
       const kritik = conflicts.find((c) => c.seviye === 'kritik');
@@ -290,7 +290,7 @@ export class ExamsService {
 
     const guncel = await this.examRepository.save(sinav);
     await this.syncInvigilators(guncel, gozetmenIds);
-    
+
     // Use the derslikIds already defined above
     await this.syncRooms(guncel, derslikIds);
 
@@ -529,13 +529,13 @@ export class ExamsService {
           const room = await this.roomRepository.findOne({ where: { id: roomId } });
           roomName = room?.ad ?? 'Bilinmeyen';
         }
-        
+
         // Get conflicting exam details
         const conflictingCourse = odaCakisan.ders?.kod ?? odaCakisan.ders?.ad ?? 'Bilinmeyen Ders';
-        const conflictingTime = odaCakisan.baslangic && odaCakisan.bitis 
+        const conflictingTime = odaCakisan.baslangic && odaCakisan.bitis
           ? `${odaCakisan.baslangic.slice(0, 5)} - ${odaCakisan.bitis.slice(0, 5)}`
           : 'Belirsiz';
-        
+
         conflicts.push({
           tur: 'derslik',
           seviye: 'kritik',
@@ -560,7 +560,7 @@ export class ExamsService {
                 if (dr.derslikId) itemRoomIds.add(dr.derslikId);
               });
             }
-            
+
             // Check if any room overlaps
             for (const roomId of examRoomIds) {
               if (itemRoomIds.has(roomId)) {
@@ -617,11 +617,11 @@ export class ExamsService {
 
     const unavailability = kisiList.length
       ? await this.unavailabilityRepository.find({
-          where: {
-            ogretimUyesiId: In(kisiList),
-          },
-          relations: ['ogretimUyesi'],
-        })
+        where: {
+          ogretimUyesiId: In(kisiList),
+        },
+        relations: ['ogretimUyesi'],
+      })
       : [];
 
     for (const kayit of unavailability) {
@@ -629,15 +629,15 @@ export class ExamsService {
         zone: timezone,
       });
       const bitis = DateTime.fromJSDate(kayit.bitis, { zone: timezone });
-      
+
       // Tarih kontrolü: Sadece aynı gün için çakışma kontrolü yap
       // baslangic datetime olduğu için tarih bilgisini buradan alıyoruz
       const unavailabilityDate = baslangic.toISODate();
       const examDate = start.toISODate();
-      
+
       // Sadece aynı gün için çakışma kontrolü yap
       if (unavailabilityDate === examDate) {
-      if (durationsOverlap(start, end, baslangic, bitis)) {
+        if (durationsOverlap(start, end, baslangic, bitis)) {
           // Öğretim üyesi bilgisini al (relation yüklü değilse veritabanından çek)
           let kisiAdi = 'Bilinmeyen';
           if (kayit.ogretimUyesi?.ad) {
@@ -648,15 +648,15 @@ export class ExamsService {
             });
             kisiAdi = ogretimUyesi?.ad ?? 'Bilinmeyen';
           }
-          
+
           const unavailabilityTime = `${baslangic.toFormat('HH:mm')} - ${bitis.toFormat('HH:mm')}`;
-          
-        conflicts.push({
-          tur: 'musait-degil',
-          seviye: 'kritik',
+
+          conflicts.push({
+            tur: 'musait-degil',
+            seviye: 'kritik',
             mesaj: `${kisiAdi} (${kayit.neden}) belirtilen saatte (${unavailabilityTime}) müsait değil.`,
-          ilgiliId: kayit.ogretimUyesiId,
-        });
+            ilgiliId: kayit.ogretimUyesiId,
+          });
         }
       }
     }
@@ -800,11 +800,11 @@ export class ExamsService {
       .where('sinav.tarih IS NOT NULL')
       .andWhere('sinav.baslangic IS NOT NULL')
       .andWhere('sinav.bitis IS NOT NULL');
-    
+
     if (examIds.length > 0) {
       existingAssignmentsQuery.andWhere('sinav.id NOT IN (:...examIds)', { examIds });
     }
-    
+
     const existingAssignments = await existingAssignmentsQuery.getMany();
 
     for (const assignment of existingAssignments) {
@@ -869,36 +869,41 @@ export class ExamsService {
     // Her sınav için gözetmen ata
     for (const exam of exams) {
       // Öğrenci kapasitesi ve derslik sayısını belirle
+      // NOT: 'exam.sinif' alanı artık formdan gelen öğrenci mevcudiyetini tutuyor
       const ogrenciKapasitesi =
-        exam.ders?.ogrenciKapasitesi ??
+        exam.sinif || // Önce formda girilen (veya ders kapasitesinden gelen) değeri kullan
+        exam.ders?.ogrenciKapasitesi ||
         exam.derslikler?.reduce(
           (sum, er) => sum + (er.derslik?.kapasite ?? 0),
           0,
-        ) ??
+        ) ||
         0;
 
       // Derslik sayısını belirle (yeni derslikler array'i veya eski derslikId)
-      const derslikSayisi = exam.derslikler?.length ?? (exam.derslikId ? 1 : 0);
+      const derslikSayisi = exam.derslikler?.length || (exam.derslikId ? 1 : 0);
       const cokluSinif = derslikSayisi >= 2;
 
       // Gözetmen sayısı ve sorumlu hoca atama stratejisini belirle
       let gerekliGozetmenSayisi: number;
       let sorumluHocaGözetmenOlsun: boolean;
 
-      if (ogrenciKapasitesi > esikDeger) {
-        // Öğrenci kapasitesi eşik değerin üstünde
+      // Eğer birden fazla derslik varsa, her dersliğin ortalama öğrenci sayısına bak
+      const odaBasinaOgrenci = derslikSayisi > 0 ? ogrenciKapasitesi / derslikSayisi : ogrenciKapasitesi;
+
+      if (odaBasinaOgrenci > esikDeger) {
+        // Her sınıf için 2 gözetmen gerekli
+        gerekliGozetmenSayisi = Math.max(2, derslikSayisi * 2);
+
         if (cokluSinif) {
-          // 2+ sınıfta yapılıyor: Sorumlu hoca gözetmen değil, 2 gözetmen gerekli
-          gerekliGozetmenSayisi = 2;
+          // Çoklu sınıfta hoca genellikle genel koordinasyon yapar, gözetmen atanmaz
           sorumluHocaGözetmenOlsun = false;
         } else {
-          // Tek sınıfta yapılıyor: Sorumlu hoca baş gözetmen + 1 gözetmen daha
-          gerekliGozetmenSayisi = 2; // Sorumlu hoca + 1 gözetmen
+          // Tek sınıfta hoca baş gözetmen olabilir
           sorumluHocaGözetmenOlsun = true;
         }
       } else {
-        // Öğrenci kapasitesi eşik değerin altında: 1 gözetmen (sorumlu hoca gözetmen değil)
-        gerekliGozetmenSayisi = 1;
+        // Her sınıf için 1 gözetmen yeterli
+        gerekliGozetmenSayisi = Math.max(1, derslikSayisi);
         sorumluHocaGözetmenOlsun = false;
       }
 
@@ -1055,12 +1060,12 @@ export class ExamsService {
       musaitGozetmenler.sort((a, b) => {
         const aGunlukYuk = gozetmenGunlukYukleri[a.id]?.[examDate] ?? 0;
         const bGunlukYuk = gozetmenGunlukYukleri[b.id]?.[examDate] ?? 0;
-        
+
         // Önce günlük yüke göre sırala
         if (aGunlukYuk !== bGunlukYuk) {
           return aGunlukYuk - bGunlukYuk;
         }
-        
+
         // Günlük yükler eşitse, toplam yüke göre sırala
         const aToplamYuk = gozetmenToplamYukleri[a.id] ?? 0;
         const bToplamYuk = gozetmenToplamYukleri[b.id] ?? 0;
@@ -1084,12 +1089,12 @@ export class ExamsService {
       // Normal gözetmenleri seç
       if (kalanGozetmenSayisi > 0) {
         const secilenNormalGozetmenler = musaitGozetmenler.slice(0, kalanGozetmenSayisi);
-        
+
         if (secilenNormalGozetmenler.length < kalanGozetmenSayisi) {
           const sebep = sorumluHocaGözetmenOlsun && sorumluHoca && !sorumluHocaMusait
             ? `Sorumlu hoca müsait olmadığı için yeterli gözetmen bulunamadı. Gerekli: ${gerekliGozetmenSayisi}, Bulunan: ${secilenGozetmenler.length + secilenNormalGozetmenler.length}`
             : `Yeterli müsait gözetmen bulunamadı. Gerekli: ${gerekliGozetmenSayisi}, Bulunan: ${secilenGozetmenler.length + secilenNormalGozetmenler.length}`;
-          
+
           atanamayanlar.push({
             sinavId: exam.id,
             sinavKod: exam.ders?.kod ?? 'Bilinmeyen',
@@ -1147,7 +1152,7 @@ export class ExamsService {
         id: er.derslikId,
         ad: er.derslik?.ad ?? 'Bilinmeyen',
       })) ?? (exam.derslikId ? [{ id: exam.derslikId, ad: exam.derslik?.ad ?? 'Bilinmeyen' }] : []);
-      
+
       const gozetmenlerDetayli = secilenGozetmenler.map((item, index) => {
         // Birden fazla derslik varsa, gözetmenleri dersliklere dağıt
         let derslikAdi = '—';
@@ -1160,7 +1165,7 @@ export class ExamsService {
             derslikAdi = derslikler[derslikIndex].ad;
           }
         }
-        
+
         return {
           id: item.instructor.id,
           ad: item.instructor.ad,

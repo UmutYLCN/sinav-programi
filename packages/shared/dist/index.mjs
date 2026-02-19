@@ -87,6 +87,7 @@ var CourseSchema = WithTimestampsSchema.extend({
   sinif: z5.number().int().min(1).max(6),
   donem: DonemEnum,
   kredi: z5.number().int().positive().nullable().optional(),
+  ogrenciKapasitesi: z5.number().int().positive().nullable().optional(),
   bolumId: IdSchema,
   bolum: DepartmentSchema.optional()
 });
@@ -98,9 +99,7 @@ var RoomSchema = WithTimestampsSchema.extend({
   ad: z6.string().min(1).max(150),
   bina: z6.string().min(1).max(150),
   tip: z6.enum(DERSLIK_TIPLERI),
-  kapasite: z6.number().int().positive(),
-  fakulteId: IdSchema,
-  fakulte: FacultySchema.optional()
+  kapasite: z6.number().int().positive()
 });
 
 // src/schemas/instructor.ts
@@ -134,6 +133,14 @@ var ExamInvigilatorSchema = WithTimestampsSchema.extend({
   gozetmen: InstructorSchema.optional()
 });
 
+// src/schemas/exam-room.ts
+var ExamRoomSchema = WithTimestampsSchema.extend({
+  id: IdSchema,
+  sinavId: IdSchema,
+  derslikId: IdSchema,
+  derslik: RoomSchema.optional()
+});
+
 // src/schemas/exam-conflict.ts
 import { z as z10 } from "zod";
 var ExamConflictTurEnum = z10.enum([
@@ -164,13 +171,18 @@ var ExamSchema = WithTimestampsSchema.extend({
   baslangic: z11.string().nullable().optional(),
   bitis: z11.string().nullable().optional(),
   derslikId: IdSchema.nullable().optional(),
+  // Deprecated: Use derslikler instead
   derslik: RoomSchema.nullable().optional(),
+  // Deprecated: Use derslikler instead
+  derslikler: z11.array(ExamRoomSchema).optional(),
   ogretimUyesiId: IdSchema.nullable().optional(),
   ogretimUyesi: InstructorSchema.nullable().optional(),
   ortakGrupId: IdSchema.nullable().optional(),
   ortakGrup: ExamGroupSchema.nullable().optional(),
   gozetmenler: z11.array(ExamInvigilatorSchema).optional(),
   onayli: z11.boolean().default(false),
+  cakismaOnayli: z11.boolean().default(false),
+  // Kontrollü çakışma onayı
   notlar: z11.string().nullable().optional(),
   teslimLinki: z11.string().url().nullable().optional(),
   teslimTarihi: z11.string().datetime().nullable().optional()
@@ -255,6 +267,7 @@ export {
   ExamGroupSchema,
   ExamInvigilatorRoleEnum,
   ExamInvigilatorSchema,
+  ExamRoomSchema,
   ExamSchema,
   ExamTurEnum,
   FacultySchema,

@@ -39,7 +39,7 @@ export class InstructorsService {
     @InjectRepository(RecurringUnavailabilityRule)
     private readonly recurringRepository: Repository<RecurringUnavailabilityRule>,
     private readonly configService: ConfigService<EnvConfig, true>,
-  ) {}
+  ) { }
 
   async create(createInstructorDto: CreateInstructorDto) {
     const existing = await this.instructorRepository.findOne({
@@ -195,14 +195,44 @@ export class InstructorsService {
   async import(dto: ImportInstructorsDto) {
     const olusturulan = [];
     const uyarilar = [];
-    
+
     for (const kayit of dto.kayitlar) {
       try {
-        const bolum = await this.departmentRepository.findOne({
-          where: { id: kayit.bolumId },
-        });
+        let bolum: Department | null = null;
+
+        if (kayit.bolumId) {
+          // Eğer bolumId bir UUID formatındaysa önce ID ile ara
+          const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(kayit.bolumId);
+
+          if (isUUID) {
+            bolum = await this.departmentRepository.findOne({
+              where: { id: kayit.bolumId },
+            });
+          }
+
+          // ID ile bulunamadıysa veya UUID değilse, Kod olarak dene (Kullanıcı kolaylığı için)
+          if (!bolum) {
+            bolum = await this.departmentRepository.findOne({
+              where: { kod: kayit.bolumId },
+            });
+          }
+        }
+
+        if (!bolum && kayit.bolumKod) {
+          bolum = await this.departmentRepository.findOne({
+            where: { kod: kayit.bolumKod },
+          });
+        }
+
+        if (!bolum && kayit.bolumAd) {
+          bolum = await this.departmentRepository.findOne({
+            where: { ad: kayit.bolumAd },
+          });
+        }
+
         if (!bolum) {
-          uyarilar.push(`Öğretim üyesi "${kayit.email}" için bölüm bulunamadı, atlandı.`);
+          const identifier = kayit.bolumId || kayit.bolumKod || kayit.bolumAd || 'Tanımsız';
+          uyarilar.push(`Öğretim üyesi "${kayit.email}" için bölüm (${identifier}) bulunamadı, atlandı.`);
           continue;
         }
 
@@ -213,7 +243,7 @@ export class InstructorsService {
           uyarilar.push(`E-posta "${kayit.email}" zaten mevcut, atlandı.`);
           continue;
         }
-        
+
         const yeni = this.instructorRepository.create({
           ...kayit,
           roller: kayit.roller ?? ['OGRETIM_UYESI'],
@@ -227,7 +257,7 @@ export class InstructorsService {
         uyarilar.push(`Öğretim üyesi "${kayit.email}" oluşturulamadı: ${mesaj}`);
       }
     }
-    
+
     return {
       mesaj: `${olusturulan.length} öğretim üyesi başarıyla içe aktarıldı.`,
       veri: olusturulan,

@@ -38,19 +38,19 @@ export function AddExamForm({ open, onOpenChange }: AddExamFormProps) {
   const [durum, setDurum] = useState<'planlanmadi' | 'taslak' | 'yayinlandi'>('planlanmadi');
   const [donem, setDonem] = useState<'guz' | 'bahar' | ''>('');
   const [sinif, setSinif] = useState<number | undefined>(undefined);
-  
+
   // Sınav için gerekli alanlar
   const [tarih, setTarih] = useState('');
   const [baslangic, setBaslangic] = useState('');
   const [bitis, setBitis] = useState('');
   const [derslikIds, setDerslikIds] = useState<string[]>([]);
-  
+
   // Opsiyonel alanlar
   const [ogretimUyesiId, setOgretimUyesiId] = useState('');
   const [gozetmenIds, setGozetmenIds] = useState<string[]>([]);
   const [notlar, setNotlar] = useState('');
   const [cakismaOnayli, setCakismaOnayli] = useState(false);
-  
+
   // Ödev/Proje için alanlar
   const [teslimTarihi, setTeslimTarihi] = useState('');
   const [teslimLinki, setTeslimLinki] = useState('');
@@ -59,6 +59,18 @@ export function AddExamForm({ open, onOpenChange }: AddExamFormProps) {
   const { data: rooms } = useRooms();
   const { data: instructors } = useInstructors();
   const createMutation = useCreateExam();
+
+  // Ders seçildiğinde otomatik dönem/sınıf doldurma ve kapasite bilgisi alma
+  const handleDersChange = (id: string) => {
+    setDersId(id);
+    const selectedCourse = courses?.find((c) => c.id === id);
+    if (selectedCourse) {
+      // Dersin öğrenci kapasitesini 'Sınıf' alanına (Öğrenci Sayısı) aktar
+      if (selectedCourse.ogrenciKapasitesi) {
+        setSinif(selectedCourse.ogrenciKapasitesi);
+      }
+    }
+  };
 
   const isSinav = tur === 'sinav';
 
@@ -77,7 +89,7 @@ export function AddExamForm({ open, onOpenChange }: AddExamFormProps) {
       const selectedRoom = rooms?.find((r) => r.id === roomId);
       const selectedCourse = courses?.find((c) => c.id === dersId);
       const ogrenciKapasitesi = selectedCourse?.ogrenciKapasitesi;
-      
+
       // Kapasite kontrolü: Eğer öğrenci kapasitesi 30 veya daha az ise amfi seçilmesine izin verme
       if (selectedRoom && ogrenciKapasitesi && ogrenciKapasitesi <= 30) {
         if (selectedRoom.tip === 'amfi') {
@@ -85,7 +97,7 @@ export function AddExamForm({ open, onOpenChange }: AddExamFormProps) {
           return;
         }
       }
-      
+
       setDerslikIds([...derslikIds, roomId]);
     }
   };
@@ -93,12 +105,12 @@ export function AddExamForm({ open, onOpenChange }: AddExamFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!dersId) return;
-    
+
     if (!ogretimUyesiId) {
       alert('Sorumlu öğretim üyesi seçimi zorunludur.');
       return;
     }
-    
+
     if (isSinav && (!tarih || !baslangic || !bitis)) {
       alert('Sınav türü için tarih, başlangıç ve bitiş saati zorunludur.');
       return;
@@ -136,7 +148,7 @@ export function AddExamForm({ open, onOpenChange }: AddExamFormProps) {
       if (cakismaOnayli) dto.cakismaOnayli = true;
 
       await createMutation.mutateAsync(dto);
-      
+
       // Reset form
       setDersId('');
       setTur('sinav');
@@ -153,7 +165,7 @@ export function AddExamForm({ open, onOpenChange }: AddExamFormProps) {
       setCakismaOnayli(false);
       setTeslimTarihi('');
       setTeslimLinki('');
-      
+
       onOpenChange(false);
     } catch (error) {
       // Error handled by mutation
@@ -178,7 +190,7 @@ export function AddExamForm({ open, onOpenChange }: AddExamFormProps) {
               <select
                 required
                 value={dersId}
-                onChange={(e) => setDersId(e.target.value)}
+                onChange={(e) => handleDersChange(e.target.value)}
                 className="w-full rounded-md border bg-background px-3 py-2 text-sm"
               >
                 <option value="">Ders seçiniz</option>
@@ -244,15 +256,14 @@ export function AddExamForm({ open, onOpenChange }: AddExamFormProps) {
                 </select>
               </div>
               <div>
-                <label className="text-sm font-medium mb-2 block">Sınıf</label>
+                <label className="text-sm font-medium mb-2 block">Öğrenci Sayısı (Mevcut)</label>
                 <input
                   type="number"
                   min={1}
-                  max={6}
                   value={sinif || ''}
                   onChange={(e) => setSinif(e.target.value ? parseInt(e.target.value) : undefined)}
                   className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-                  placeholder="Ders sınıfını kullan"
+                  placeholder="Ders kapasitesini kullan"
                 />
               </div>
             </div>
@@ -317,15 +328,14 @@ export function AddExamForm({ open, onOpenChange }: AddExamFormProps) {
                           {rooms?.map((r) => {
                             const isDisabled = ogrenciKapasitesi && ogrenciKapasitesi <= 30 && r.tip === 'amfi';
                             const isSelected = derslikIds.includes(r.id);
-                            
+
                             return (
-                              <label 
-                                key={r.id} 
-                                className={`flex items-center gap-2 ${
-                                  isDisabled && !isSelected 
-                                    ? 'cursor-not-allowed opacity-50' 
-                                    : 'cursor-pointer'
-                                }`}
+                              <label
+                                key={r.id}
+                                className={`flex items-center gap-2 ${isDisabled && !isSelected
+                                  ? 'cursor-not-allowed opacity-50'
+                                  : 'cursor-pointer'
+                                  }`}
                               >
                                 <input
                                   type="checkbox"
@@ -442,7 +452,7 @@ export function AddExamForm({ open, onOpenChange }: AddExamFormProps) {
                       Kontrollü Çakışma Onayı
                     </div>
                     <div className="text-xs text-amber-800 dark:text-amber-200">
-                      Bu seçeneği işaretlerseniz, çakışma tespit edilse bile sınav kaydedilebilir. 
+                      Bu seçeneği işaretlerseniz, çakışma tespit edilse bile sınav kaydedilebilir.
                       Örnek: İki bölüm aynı dersi alıyorsa ve sınıf mevcudu azsa aynı sınıfa yazılabilir.
                     </div>
                   </div>

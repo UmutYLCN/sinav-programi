@@ -33,7 +33,7 @@ export default function AutoAssignInvigilatorsPage() {
   const [isAssigning, setIsAssigning] = useState(false);
 
   const { data: departments } = useDepartments();
-  const { data: examsData, isLoading: examsLoading } = useExams({
+  const { data: examsData } = useExams({
     donem: donem || undefined,
     bolumId: bolumId || undefined,
     durum: durum || undefined,
@@ -168,7 +168,7 @@ export default function AutoAssignInvigilatorsPage() {
               className="max-w-xs"
             />
             <p className="text-sm text-muted-foreground">
-              Öğrenci kapasitesi ≤ {esikDeger} ise 1 gözetmen, &gt; {esikDeger}{' '}
+              Her derslik için; derslik başına düşen öğrenci sayısı ≤ {esikDeger} ise 1 gözetmen, &gt; {esikDeger}{' '}
               ise 2 gözetmen atanır.
             </p>
           </div>
@@ -242,7 +242,12 @@ export default function AutoAssignInvigilatorsPage() {
                           {exam.tarih} {exam.baslangic} - {exam.bitis}
                         </span>
                         <Badge variant="outline">
-                          {exam.ders?.ogrenciKapasitesi ?? 'N/A'} öğrenci
+                          {exam.sinif || exam.ders?.ogrenciKapasitesi || 'N/A'} öğrenci
+                          {exam.derslikler && exam.derslikler.length > 1 && (
+                            <span className="ml-1 opacity-70">
+                              ({exam.derslikler.length} derslik)
+                            </span>
+                          )}
                         </Badge>
                       </div>
                     </Label>
@@ -301,7 +306,7 @@ export default function AutoAssignInvigilatorsPage() {
                         <Badge>{item.gozetmenSayisi} gözetmen</Badge>
                       </div>
                       <div className="text-sm text-muted-foreground space-y-1">
-                        {item.gozetmenler.map((g, idx) => (
+                        {item.gozetmenler.map((g) => (
                           <div key={g.id}>
                             • {g.ad}{' '}
                             <Badge variant="outline" className="ml-1">
