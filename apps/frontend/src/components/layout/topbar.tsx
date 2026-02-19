@@ -3,14 +3,22 @@ import { Button } from '@/components/ui/button';
 import { useTheme } from '@/providers/theme-provider';
 import { useState } from 'react';
 import { NAV_ITEMS } from '@/config/navigation';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 export function TopBar() {
   const { theme, setTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
+
+  const handleLogout = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
 
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between border-b bg-background/80 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -32,9 +40,18 @@ export function TopBar() {
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-4">
         <Button variant="outline" size="sm" onClick={toggleTheme}>
           {theme === 'light' ? 'Karanlık Mod' : 'Aydınlık Mod'}
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleLogout}
+          className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
+        >
+          Çıkış Yap
         </Button>
       </div>
 
