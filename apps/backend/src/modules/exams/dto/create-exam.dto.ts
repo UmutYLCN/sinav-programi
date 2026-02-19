@@ -10,6 +10,8 @@ import {
   IsString,
   IsUUID,
   Length,
+  Max,
+  Min,
   ValidateIf,
 } from 'class-validator';
 import {
@@ -40,7 +42,9 @@ export class CreateExamDto {
   donem?: string;
 
   @IsOptional()
-  @IsInt({ message: 'Sınıf değeri tam sayı olmalıdır.' })
+  @IsInt({ message: 'Sınıf adedi tam sayı olmalıdır.' })
+  @Min(1, { message: 'Sınıf adedi en az 1 olmalıdır.' })
+  @Max(6, { message: 'Sınıf adedi en fazla 6 olabilir.' })
   sinif?: number;
 
   @ValidateIf((o) => (o as CreateExamDto).tur === 'sinav')

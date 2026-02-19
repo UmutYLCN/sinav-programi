@@ -868,42 +868,21 @@ export class ExamsService {
 
     // Her sınav için gözetmen ata
     for (const exam of exams) {
-      // Öğrenci kapasitesi ve derslik sayısını belirle
-      // NOT: 'exam.sinif' alanı artık formdan gelen öğrenci mevcudiyetini tutuyor
-      const ogrenciKapasitesi =
-        exam.sinif || // Önce formda girilen (veya ders kapasitesinden gelen) değeri kullan
-        exam.ders?.ogrenciKapasitesi ||
-        exam.derslikler?.reduce(
-          (sum, er) => sum + (er.derslik?.kapasite ?? 0),
-          0,
-        ) ||
-        0;
+      // Sınıf adedi'ne göre gözetmen sayısını belirle
+      // sinif = 1: Sorumlu öğretim üyesi yeterli, ek gözetmen gerekmez
+      // sinif >= 2: Her sınıf için 1 gözetmen atanacak (sinif kadar gözetmen)
+      const sinifAdedi = Math.min(6, exam.sinif || 1);
 
-      // Derslik sayısını belirle (yeni derslikler array'i veya eski derslikId)
-      const derslikSayisi = exam.derslikler?.length || (exam.derslikId ? 1 : 0);
-      const cokluSinif = derslikSayisi >= 2;
-
-      // Gözetmen sayısı ve sorumlu hoca atama stratejisini belirle
       let gerekliGozetmenSayisi: number;
       let sorumluHocaGözetmenOlsun: boolean;
 
-      // Eğer birden fazla derslik varsa, her dersliğin ortalama öğrenci sayısına bak
-      const odaBasinaOgrenci = derslikSayisi > 0 ? ogrenciKapasitesi / derslikSayisi : ogrenciKapasitesi;
-
-      if (odaBasinaOgrenci > esikDeger) {
-        // Her sınıf için 2 gözetmen gerekli
-        gerekliGozetmenSayisi = Math.max(2, derslikSayisi * 2);
-
-        if (cokluSinif) {
-          // Çoklu sınıfta hoca genellikle genel koordinasyon yapar, gözetmen atanmaz
-          sorumluHocaGözetmenOlsun = false;
-        } else {
-          // Tek sınıfta hoca baş gözetmen olabilir
-          sorumluHocaGözetmenOlsun = true;
-        }
+      if (sinifAdedi === 1) {
+        // Tek sınıf: Sorumlu öğretim üyesi gözetmenlik yapar
+        gerekliGozetmenSayisi = 0;
+        sorumluHocaGözetmenOlsun = true;
       } else {
-        // Her sınıf için 1 gözetmen yeterli
-        gerekliGozetmenSayisi = Math.max(1, derslikSayisi);
+        // Birden fazla sınıf: Her sınıf için 1 gözetmen
+        gerekliGozetmenSayisi = sinifAdedi;
         sorumluHocaGözetmenOlsun = false;
       }
 

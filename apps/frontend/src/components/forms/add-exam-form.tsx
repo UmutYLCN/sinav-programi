@@ -37,7 +37,7 @@ export function AddExamForm({ open, onOpenChange }: AddExamFormProps) {
   const [tur, setTur] = useState<'sinav' | 'odev' | 'proje'>('sinav');
   const [durum, setDurum] = useState<'planlanmadi' | 'taslak' | 'yayinlandi'>('planlanmadi');
   const [donem, setDonem] = useState<'guz' | 'bahar' | ''>('');
-  const [sinif, setSinif] = useState<number | undefined>(undefined);
+  const [sinif, setSinif] = useState<number>(1);
 
   // Sınav için gerekli alanlar
   const [tarih, setTarih] = useState('');
@@ -60,27 +60,14 @@ export function AddExamForm({ open, onOpenChange }: AddExamFormProps) {
   const { data: instructors } = useInstructors();
   const createMutation = useCreateExam();
 
-  // Ders seçildiğinde otomatik dönem/sınıf doldurma ve kapasite bilgisi alma
+  // Ders seçildiğinde otomatik dönem doldurma
   const handleDersChange = (id: string) => {
     setDersId(id);
-    const selectedCourse = courses?.find((c) => c.id === id);
-    if (selectedCourse) {
-      // Dersin öğrenci kapasitesini 'Sınıf' alanına (Öğrenci Sayısı) aktar
-      if (selectedCourse.ogrenciKapasitesi) {
-        setSinif(selectedCourse.ogrenciKapasitesi);
-      }
-    }
   };
 
   const isSinav = tur === 'sinav';
 
-  const handleGozetmenToggle = (instructorId: string) => {
-    if (gozetmenIds.includes(instructorId)) {
-      setGozetmenIds(gozetmenIds.filter((id) => id !== instructorId));
-    } else {
-      setGozetmenIds([...gozetmenIds, instructorId]);
-    }
-  };
+
 
   const handleDerslikToggle = (roomId: string) => {
     if (derslikIds.includes(roomId)) {
@@ -115,6 +102,7 @@ export function AddExamForm({ open, onOpenChange }: AddExamFormProps) {
       alert('Sınav türü için tarih, başlangıç ve bitiş saati zorunludur.');
       return;
     }
+
 
     try {
       const dto: any = {
@@ -154,7 +142,7 @@ export function AddExamForm({ open, onOpenChange }: AddExamFormProps) {
       setTur('sinav');
       setDurum('planlanmadi');
       setDonem('');
-      setSinif(undefined);
+      setSinif(1);
       setTarih('');
       setBaslangic('');
       setBitis('');
@@ -256,15 +244,20 @@ export function AddExamForm({ open, onOpenChange }: AddExamFormProps) {
                 </select>
               </div>
               <div>
-                <label className="text-sm font-medium mb-2 block">Öğrenci Sayısı (Mevcut)</label>
-                <input
-                  type="number"
-                  min={1}
-                  value={sinif || ''}
-                  onChange={(e) => setSinif(e.target.value ? parseInt(e.target.value) : undefined)}
+                <label className="text-sm font-medium mb-2 block">Sınıf Adedi</label>
+                <select
+                  value={sinif}
+                  onChange={(e) => {
+                    setSinif(parseInt(e.target.value));
+                  }}
                   className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-                  placeholder="Ders kapasitesini kullan"
-                />
+                >
+                  {[1, 2, 3, 4, 5, 6].map((n) => (
+                    <option key={n} value={n}>
+                      {n} sınıf
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -326,7 +319,7 @@ export function AddExamForm({ open, onOpenChange }: AddExamFormProps) {
                         )}
                         <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-3">
                           {rooms?.map((r) => {
-                            const isDisabled = ogrenciKapasitesi && ogrenciKapasitesi <= 30 && r.tip === 'amfi';
+                            const isDisabled = Boolean(ogrenciKapasitesi && ogrenciKapasitesi <= 30 && r.tip === 'amfi');
                             const isSelected = derslikIds.includes(r.id);
 
                             return (
@@ -405,27 +398,6 @@ export function AddExamForm({ open, onOpenChange }: AddExamFormProps) {
               </select>
             </div>
 
-            <div>
-              <label className="text-sm font-medium mb-2 block">
-                Gözetmenler (İstediğiniz kadar seçebilirsiniz)
-              </label>
-              <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-3">
-                {instructors?.map((i) => (
-                  <label key={i.id} className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={gozetmenIds.includes(i.id)}
-                      onChange={() => handleGozetmenToggle(i.id)}
-                      className="rounded border-gray-300"
-                    />
-                    <span className="text-sm">{i.ad} ({i.email})</span>
-                  </label>
-                ))}
-                {instructors?.length === 0 && (
-                  <p className="text-sm text-muted-foreground">Gözetmen bulunamadı</p>
-                )}
-              </div>
-            </div>
 
             <div>
               <label className="text-sm font-medium mb-2 block">Notlar</label>

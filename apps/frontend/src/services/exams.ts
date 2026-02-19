@@ -26,7 +26,7 @@ export const fetchExams = async (filters: ExamFilters = {}) => {
   if (filters.durum) params.durum = filters.durum;
   if (filters.tur) params.tur = filters.tur;
   if (filters.bolumId) params.bolumId = filters.bolumId;
-  
+
   const { data } = await apiClient.get<ExamsResponse>('/exams', {
     params,
   });
