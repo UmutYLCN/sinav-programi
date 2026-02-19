@@ -11,11 +11,21 @@ import UnavailabilityPage from '@/pages/unavailability';
 import InvigilatorLoadPage from '@/pages/invigilator-load';
 import DataManagementPage from '@/pages/data-management';
 import AutoAssignInvigilatorsPage from '@/pages/auto-assign-invigilators';
+import LoginPage from '@/pages/login';
+import { AuthGuard } from '@/components/auth/auth-guard';
 
 const router = createBrowserRouter([
   {
+    path: '/login',
+    element: <LoginPage />,
+  },
+  {
     path: '/',
-    element: <AppShell />,
+    element: (
+      <AuthGuard>
+        <AppShell />
+      </AuthGuard>
+    ),
     children: [
       { index: true, element: <DashboardPage /> },
       { path: 'exams', element: <ExamsPage /> },
@@ -30,4 +40,3 @@ const router = createBrowserRouter([
 ]);
 
 export const AppRouter = () => <RouterProvider router={router} />;
-
