@@ -1,19 +1,44 @@
 import { DataSource } from 'typeorm';
+import * as argon2 from 'argon2';
 import { Faculty } from '../entities/faculty.entity';
 import { Department } from '../entities/department.entity';
 import { Instructor } from '../entities/instructor.entity';
 import { Room } from '../entities/room.entity';
 import { Course } from '../entities/course.entity';
+import { User } from '../entities/user.entity';
 import type { Donem, KullaniciRol, DerslikTip } from '@sinav/shared';
 
 export class InitialSeeder {
-  constructor(private readonly dataSource: DataSource) {}
+  constructor(private readonly dataSource: DataSource) { }
 
   async run(): Promise<void> {
     await this.seedFacultiesAndDepartments();
     await this.seedInstructors();
     await this.seedRooms();
     await this.seedCourses();
+    await this.seedAdminUser();
+  }
+
+  private async seedAdminUser() {
+    const userRepo = this.dataSource.getRepository(User);
+
+    const existing = await userRepo.findOne({
+      where: { email: 'admin@sinav.com' },
+    });
+    if (existing) {
+      console.log('ℹ️  Admin kullanıcı zaten mevcut, atlanıyor.');
+      return;
+    }
+
+    const user = userRepo.create({
+      email: 'admin@sinav.com',
+      sifreHash: await argon2.hash('admin123'),
+      rol: 'YONETICI' as KullaniciRol,
+      aktif: true,
+    });
+
+    await userRepo.save(user);
+    console.log('✅ Admin kullanıcı oluşturuldu: admin@sinav.com / admin123');
   }
 
   private async seedFacultiesAndDepartments() {
@@ -79,28 +104,28 @@ export class InitialSeeder {
       bolumKod: string;
       roller: KullaniciRol[];
     }> = [
-      {
-        ad: 'Dr. Öğr. Üyesi Ayşe Yılmaz',
-        email: 'ayse.yilmaz@example.edu.tr',
-        bolumKod: 'CENG',
-        roller: ['OGRETIM_UYESI' as KullaniciRol],
-      },
-      {
-        ad: 'Doç. Dr. Mehmet Demir',
-        email: 'mehmet.demir@example.edu.tr',
-        bolumKod: 'EE',
-        roller: [
-          'OGRETIM_UYESI' as KullaniciRol,
-          'BOLUM_SORUMLUSU' as KullaniciRol,
-        ],
-      },
-      {
-        ad: 'Prof. Dr. Elif Kaya',
-        email: 'elif.kaya@example.edu.tr',
-        bolumKod: 'MAT',
-        roller: ['OGRETIM_UYESI' as KullaniciRol],
-      },
-    ];
+        {
+          ad: 'Dr. Öğr. Üyesi Ayşe Yılmaz',
+          email: 'ayse.yilmaz@example.edu.tr',
+          bolumKod: 'CENG',
+          roller: ['OGRETIM_UYESI' as KullaniciRol],
+        },
+        {
+          ad: 'Doç. Dr. Mehmet Demir',
+          email: 'mehmet.demir@example.edu.tr',
+          bolumKod: 'EE',
+          roller: [
+            'OGRETIM_UYESI' as KullaniciRol,
+            'BOLUM_SORUMLUSU' as KullaniciRol,
+          ],
+        },
+        {
+          ad: 'Prof. Dr. Elif Kaya',
+          email: 'elif.kaya@example.edu.tr',
+          bolumKod: 'MAT',
+          roller: ['OGRETIM_UYESI' as KullaniciRol],
+        },
+      ];
 
     for (const inst of instructors) {
       const bolum = departments.find((d) => d.kod === inst.bolumKod);
@@ -135,19 +160,19 @@ export class InitialSeeder {
         tip: DerslikTip;
         kapasite: number;
       }> = [
-        {
-          ad: `${faculty.kod}-A101`,
-          bina: 'A Blok',
-          tip: 'amfi' as DerslikTip,
-          kapasite: 120,
-        },
-        {
-          ad: `${faculty.kod}-L201`,
-          bina: 'Laboratuvar Binası',
-          tip: 'laboratuvar' as DerslikTip,
-          kapasite: 40,
-        },
-      ];
+          {
+            ad: `${faculty.kod}-A101`,
+            bina: 'A Blok',
+            tip: 'amfi' as DerslikTip,
+            kapasite: 120,
+          },
+          {
+            ad: `${faculty.kod}-L201`,
+            bina: 'Laboratuvar Binası',
+            tip: 'laboratuvar' as DerslikTip,
+            kapasite: 40,
+          },
+        ];
 
       for (const room of rooms) {
         const existing = await roomRepo.findOne({

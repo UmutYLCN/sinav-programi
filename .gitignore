@@ -1,1 +1,16 @@
 node_modules
+dist
+
+# Ortam değişkenleri (hassas bilgiler)
+.env.local
+.env.*.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
