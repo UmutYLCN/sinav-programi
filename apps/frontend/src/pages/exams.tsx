@@ -53,7 +53,7 @@ export default function ExamsPage() {
   // Group exams by department and filter
   const { groupedExams, problemExams } = useMemo(() => {
     const allExams = data?.veriler ?? [];
-    
+
     // Filter exams based on filters
     let filtered = allExams.filter((exam) => {
       if (filters.donem && exam.donem !== filters.donem) return false;
@@ -78,7 +78,7 @@ export default function ExamsPage() {
     const normal: Exam[] = [];
 
     filtered.forEach((exam) => {
-      const hasConflict = selectedExamDetail?.id === exam.id 
+      const hasConflict = selectedExamDetail?.id === exam.id
         ? (selectedExamDetail.cakismalar?.length ?? 0) > 0
         : false; // We'll check conflicts from detail panel
       const hasNoProctors = !exam.gozetmenler || exam.gozetmenler.length === 0;
@@ -95,12 +95,12 @@ export default function ExamsPage() {
     normal.forEach((exam) => {
       const deptName = exam.ders?.bolum?.ad ?? 'Diğer';
       const sinif = exam.sinif ?? 0;
-      
+
       if (!groupedByDept.has(deptName)) {
         groupedByDept.set(deptName, new Map());
       }
       const deptGroup = groupedByDept.get(deptName)!;
-      
+
       if (!deptGroup.has(sinif)) {
         deptGroup.set(sinif, []);
       }
@@ -111,11 +111,11 @@ export default function ExamsPage() {
     const sortedGroups: Array<[string, Exam[]]> = [];
     const sortedDepts = Array.from(groupedByDept.entries())
       .sort(([a], [b]) => a.localeCompare(b, 'tr')); // Sort departments alphabetically
-    
+
     sortedDepts.forEach(([dept, classMap]) => {
       const sortedClasses = Array.from(classMap.entries())
         .sort(([a], [b]) => a - b); // Sort classes numerically (1, 2, 3, ...)
-      
+
       sortedClasses.forEach(([sinif, exams]) => {
         const sortedExams = exams.sort((a, b) => {
           // Sort by course code
@@ -322,16 +322,6 @@ export default function ExamsPage() {
                   </td>
                 </tr>
               )}
-              {!isLoading && !isError && filteredExams.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={9}
-                    className="px-6 py-6 text-center text-muted-foreground"
-                  >
-                    Kriterlere uygun sınav bulunamadı.
-                  </td>
-                </tr>
-              )}
               {!isLoading &&
                 !isError &&
                 (filters.cakismaVar || filters.gozetmenEksik ? (
@@ -446,12 +436,12 @@ function ExamRow({
 }) {
   const start = formatTime(exam.baslangic);
   const end = formatTime(exam.bitis);
-  
+
   // Get all rooms (from both old derslik and new derslikler)
   const rooms = exam.derslikler && exam.derslikler.length > 0
     ? exam.derslikler.map((dr) => dr.derslik?.ad).filter(Boolean).join(', ')
     : exam.derslik?.ad ?? 'Atanmadı';
-  
+
   // Get all proctors - show them vertically
   const proctors = exam.gozetmenler && exam.gozetmenler.length > 0
     ? exam.gozetmenler.map((g) => g.gozetmen?.ad).filter(Boolean)

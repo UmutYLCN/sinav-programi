@@ -29,6 +29,7 @@ export const ExamSchema = WithTimestampsSchema.extend({
   gozetmenler: z.array(ExamInvigilatorSchema).optional(),
   onayli: z.boolean().default(false),
   cakismaOnayli: z.boolean().default(false), // Kontrollü çakışma onayı
+  ogrenciSayilari: z.array(z.number().int().min(1)).nullable().optional(),
   notlar: z.string().nullable().optional(),
   teslimLinki: z.string().url().nullable().optional(),
   teslimTarihi: z.string().datetime().nullable().optional(),

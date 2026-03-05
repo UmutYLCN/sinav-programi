@@ -109,6 +109,9 @@ export class Exam extends CoreEntity {
   @Column({ name: 'cakisma_onayli', default: false })
   cakismaOnayli: boolean; // Kontrollü çakışma onayı
 
+  @Column({ type: 'json', nullable: true })
+  ogrenciSayilari?: number[] | null;
+
   @Column({ type: 'text', nullable: true })
   notlar?: string | null;
 

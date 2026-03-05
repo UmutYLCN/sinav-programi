@@ -57,6 +57,8 @@ export interface UpdateExamInput {
   tarih?: string;
   baslangic?: string;
   bitis?: string;
+  sinif?: number;
+  ogrenciSayilari?: number[];
   notlar?: string;
 }
 
@@ -109,6 +111,7 @@ export interface CreateExamDto {
   durum?: 'planlanmadi' | 'taslak' | 'yayinlandi';
   donem?: 'guz' | 'bahar';
   sinif?: number;
+  ogrenciSayilari?: number[];
   tarih?: string; // ISO date string (YYYY-MM-DD)
   baslangic?: string; // HH:mm format
   bitis?: string; // HH:mm format
@@ -118,6 +121,7 @@ export interface CreateExamDto {
   ortakGrupId?: string;
   gozetmenIds?: string[]; // No limit now
   notlar?: string;
+  cakismaOnayli?: boolean;
   teslimTarihi?: string | null;
   teslimLinki?: string | null;
 }
@@ -142,8 +146,7 @@ export interface AutoAssignInvigilatorsDto {
   donem?: string;
   bolumId?: string;
   durum?: string;
-  esikDeger?: number; // Öğrenci kapasitesi eşiği (varsayılan: 30)
-  sinavIds?: string[]; // Seçili sınavlar için
+  sinavIds?: string[];
 }
 
 export interface AutoAssignResult {

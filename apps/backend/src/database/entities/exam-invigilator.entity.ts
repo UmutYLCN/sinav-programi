@@ -28,4 +28,11 @@ export class ExamInvigilator extends CoreEntity {
 
   @Column({ type: 'enum', enum: ['birincil', 'ikincil'], default: 'birincil' })
   rol: InvigilatorRole;
+
+  @Column({ name: 'derslik_id', nullable: true })
+  derslikId?: string | null;
+
+  @ManyToOne('Room', { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'derslik_id' })
+  derslik?: any; // Dynamic reference to avoid circular dep
 }

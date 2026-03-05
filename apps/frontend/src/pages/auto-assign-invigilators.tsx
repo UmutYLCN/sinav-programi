@@ -9,7 +9,6 @@ import {
 import { useDepartments } from '@/services/departments';
 import { Button } from '@/components/ui/button';
 import { Select, SelectItem } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -22,7 +21,7 @@ export default function AutoAssignInvigilatorsPage() {
   const [donem, setDonem] = useState<string>('');
   const [bolumId, setBolumId] = useState<string>('');
   const [durum, setDurum] = useState<string>('');
-  const [esikDeger, setEsikDeger] = useState<number>(30);
+
   const [assignmentMode, setAssignmentMode] = useState<AssignmentMode>('all');
   const [selectedExamIds, setSelectedExamIds] = useState<Set<string>>(
     new Set(),
@@ -75,7 +74,6 @@ export default function AutoAssignInvigilatorsPage() {
         donem: donem || undefined,
         bolumId: bolumId || undefined,
         durum: durum || undefined,
-        esikDeger,
         sinavIds:
           assignmentMode === 'selected'
             ? Array.from(selectedExamIds)
@@ -153,25 +151,6 @@ export default function AutoAssignInvigilatorsPage() {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="esikDeger">
-              Öğrenci Kapasitesi Eşiği (Bu değerin üstünde 2 gözetmen
-              atanır)
-            </Label>
-            <Input
-              id="esikDeger"
-              type="number"
-              min="1"
-              max="200"
-              value={esikDeger}
-              onChange={(e) => setEsikDeger(Number(e.target.value))}
-              className="max-w-xs"
-            />
-            <p className="text-sm text-muted-foreground">
-              Her derslik için; derslik başına düşen öğrenci sayısı ≤ {esikDeger} ise 1 gözetmen, &gt; {esikDeger}{' '}
-              ise 2 gözetmen atanır.
-            </p>
-          </div>
         </CardContent>
       </Card>
 

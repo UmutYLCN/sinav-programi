@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { useCreateExam } from '@/services/exams';
+import { useCreateExam, type CreateExamDto } from '@/services/exams';
+
 import { useCourses } from '@/services/courses';
 import { useRooms } from '@/services/rooms';
 import { useInstructors } from '@/services/instructors';
@@ -38,6 +39,7 @@ export function AddExamForm({ open, onOpenChange }: AddExamFormProps) {
   const [durum, setDurum] = useState<'planlanmadi' | 'taslak' | 'yayinlandi'>('planlanmadi');
   const [donem, setDonem] = useState<'guz' | 'bahar' | ''>('');
   const [sinif, setSinif] = useState<number>(1);
+  const [ogrenciSayilari, setOgrenciSayilari] = useState<number[]>([1]);
 
   // Sınav için gerekli alanlar
   const [tarih, setTarih] = useState('');
@@ -50,6 +52,7 @@ export function AddExamForm({ open, onOpenChange }: AddExamFormProps) {
   const [gozetmenIds, setGozetmenIds] = useState<string[]>([]);
   const [notlar, setNotlar] = useState('');
   const [cakismaOnayli, setCakismaOnayli] = useState(false);
+  const [capacityError, setCapacityError] = useState(false);
 
   // Ödev/Proje için alanlar
   const [teslimTarihi, setTeslimTarihi] = useState('');
@@ -63,6 +66,14 @@ export function AddExamForm({ open, onOpenChange }: AddExamFormProps) {
   // Ders seçildiğinde otomatik dönem doldurma
   const handleDersChange = (id: string) => {
     setDersId(id);
+  };
+
+  const handleOgretimUyesiChange = (id: string) => {
+    setOgretimUyesiId(id);
+    // Sorumlu hoca değiştiğinde, eğer gözetmenler arasındaysa oradan çıkar
+    if (gozetmenIds.includes(id)) {
+      setGozetmenIds(gozetmenIds.filter(gid => gid !== id));
+    }
   };
 
   const isSinav = tur === 'sinav';
@@ -89,6 +100,31 @@ export function AddExamForm({ open, onOpenChange }: AddExamFormProps) {
     }
   };
 
+  const handleSinifChange = (n: number) => {
+    setSinif(n);
+    setOgrenciSayilari((prev) => {
+      const next = [...prev];
+      if (n > prev.length) {
+        // Add new entries
+        for (let i = prev.length; i < n; i++) {
+          next.push(1);
+        }
+      } else if (n < prev.length) {
+        // Remove extra entries
+        return next.slice(0, n);
+      }
+      return next;
+    });
+  };
+
+  const handleOgrenciSayisiChange = (index: number, value: number) => {
+    setOgrenciSayilari((prev) => {
+      const next = [...prev];
+      next[index] = value;
+      return next;
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!dersId) return;
@@ -103,9 +139,24 @@ export function AddExamForm({ open, onOpenChange }: AddExamFormProps) {
       return;
     }
 
+    if (isSinav) {
+      const totalStudents = ogrenciSayilari.reduce((a, b) => a + b, 0);
+      const totalCapacity = derslikIds
+        .map((id) => rooms?.find((r) => r.id === id)?.kapasite || 0)
+        .reduce((a, b) => a + b, 0);
+
+      if (totalStudents > totalCapacity) {
+        setCapacityError(true);
+        alert(
+          `Yetersiz Derslik Kapasitesi!\n\nToplam Öğrenci: ${totalStudents}\nToplam Kapasite: ${totalCapacity}\n\nLütfen en az ${totalStudents - totalCapacity} kişilik daha yer sağlayacak ek derslik seçiniz.`
+        );
+        return;
+      }
+    }
+
 
     try {
-      const dto: any = {
+      const dto: CreateExamDto = {
         dersId,
         tur,
         durum,
@@ -113,6 +164,7 @@ export function AddExamForm({ open, onOpenChange }: AddExamFormProps) {
 
       if (donem) dto.donem = donem;
       if (sinif) dto.sinif = sinif;
+      if (ogrenciSayilari.length > 0) dto.ogrenciSayilari = ogrenciSayilari;
       if (notlar) dto.notlar = notlar;
 
       if (isSinav) {
@@ -143,6 +195,7 @@ export function AddExamForm({ open, onOpenChange }: AddExamFormProps) {
       setDurum('planlanmadi');
       setDonem('');
       setSinif(1);
+      setOgrenciSayilari([1]);
       setTarih('');
       setBaslangic('');
       setBitis('');
@@ -151,6 +204,7 @@ export function AddExamForm({ open, onOpenChange }: AddExamFormProps) {
       setGozetmenIds([]);
       setNotlar('');
       setCakismaOnayli(false);
+      setCapacityError(false);
       setTeslimTarihi('');
       setTeslimLinki('');
 
@@ -248,7 +302,7 @@ export function AddExamForm({ open, onOpenChange }: AddExamFormProps) {
                 <select
                   value={sinif}
                   onChange={(e) => {
-                    setSinif(parseInt(e.target.value));
+                    handleSinifChange(parseInt(e.target.value));
                   }}
                   className="w-full rounded-md border bg-background px-3 py-2 text-sm"
                 >
@@ -259,6 +313,33 @@ export function AddExamForm({ open, onOpenChange }: AddExamFormProps) {
                   ))}
                 </select>
               </div>
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-sm font-medium block">
+                Her Şube İçin Öğrenci Sayıları <span className="text-destructive">*</span>
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {Array.from({ length: sinif }).map((_, idx) => (
+                  <div key={idx} className="space-y-1">
+                    <label className="text-[10px] uppercase font-bold text-muted-foreground">
+                      Şube {idx + 1}
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      required
+                      value={ogrenciSayilari[idx] || ''}
+                      onChange={(e) => handleOgrenciSayisiChange(idx, parseInt(e.target.value) || 0)}
+                      className="w-full rounded-md border bg-background px-3 py-1.5 text-sm"
+                      placeholder="Öğrenci sayısı"
+                    />
+                  </div>
+                ))}
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Toplam: {ogrenciSayilari.reduce((a, b) => a + b, 0)} öğrenci
+              </p>
             </div>
 
             {isSinav ? (
@@ -307,16 +388,40 @@ export function AddExamForm({ open, onOpenChange }: AddExamFormProps) {
                   {(() => {
                     const selectedCourse = courses?.find((c) => c.id === dersId);
                     const ogrenciKapasitesi = selectedCourse?.ogrenciKapasitesi;
+                    const totalStudents = ogrenciSayilari.reduce((a, b) => a + b, 0);
+                    const totalCapacity = derslikIds
+                      .map((id) => rooms?.find((r) => r.id === id)?.kapasite || 0)
+                      .reduce((a, b) => a + b, 0);
+                    const isCapacityEnough = totalCapacity >= totalStudents;
+
                     return (
                       <>
-                        {ogrenciKapasitesi && (
-                          <div className="text-xs text-muted-foreground mb-2 pb-2 border-b">
-                            Dersin öğrenci kapasitesi: <strong>{ogrenciKapasitesi} öğrenci</strong>
-                            {ogrenciKapasitesi <= 30 && (
-                              <span className="text-amber-600 ml-1">(Amfi seçilemez)</span>
-                            )}
-                          </div>
-                        )}
+                        <div className="flex flex-col gap-2 mb-2 pb-2 border-b">
+                          {ogrenciKapasitesi && (
+                            <div className="text-xs text-muted-foreground">
+                              Dersin Kayıtlı Kapasitesi: <strong>{ogrenciKapasitesi} öğrenci</strong>
+                              {ogrenciKapasitesi <= 30 && (
+                                <span className="text-amber-600 ml-1">(Amfi seçilemez)</span>
+                              )}
+                            </div>
+                          )}
+                          {capacityError && (
+                            <div className={`text-xs font-semibold flex items-center justify-between p-2 rounded-md transition-colors ${isCapacityEnough
+                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                              : 'bg-destructive/10 text-destructive border border-destructive/20'
+                              }`}>
+                              <span>
+                                Yerleşen: {totalStudents} / Kapasite: {totalCapacity}
+                              </span>
+                              {!isCapacityEnough && (
+                                <span className="animate-pulse">⚠️ {totalStudents - totalCapacity} kişilik yer eksik!</span>
+                              )}
+                              {isCapacityEnough && (
+                                <span>✅ Kapasite Yeterli</span>
+                              )}
+                            </div>
+                          )}
+                        </div>
                         <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-3">
                           {rooms?.map((r) => {
                             const isDisabled = Boolean(ogrenciKapasitesi && ogrenciKapasitesi <= 30 && r.tip === 'amfi');
@@ -386,7 +491,7 @@ export function AddExamForm({ open, onOpenChange }: AddExamFormProps) {
               <select
                 required
                 value={ogretimUyesiId}
-                onChange={(e) => setOgretimUyesiId(e.target.value)}
+                onChange={(e) => handleOgretimUyesiChange(e.target.value)}
                 className="w-full rounded-md border bg-background px-3 py-2 text-sm"
               >
                 <option value="">Öğretim üyesi seçiniz</option>
@@ -396,6 +501,41 @@ export function AddExamForm({ open, onOpenChange }: AddExamFormProps) {
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-2 block text-muted-foreground/80">
+                Ek Gözetmenler (Sorumlu hoca haricindekiler)
+              </label>
+              <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-3 bg-muted/20">
+                {instructors
+                  ?.filter((i) => i.id !== ogretimUyesiId) // Sorumlu hocayı listeden çıkar
+                  ?.map((i) => (
+                    <label
+                      key={i.id}
+                      className="flex items-center gap-2 cursor-pointer hover:bg-muted/50 p-1 rounded transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={gozetmenIds.includes(i.id)}
+                        onChange={() => {
+                          if (gozetmenIds.includes(i.id)) {
+                            setGozetmenIds(gozetmenIds.filter((id) => id !== i.id));
+                          } else {
+                            setGozetmenIds([...gozetmenIds, i.id]);
+                          }
+                        }}
+                        className="rounded border-gray-300"
+                      />
+                      <span className="text-sm">
+                        {i.ad} <span className="text-[10px] text-muted-foreground">({i.bolum?.ad})</span>
+                      </span>
+                    </label>
+                  ))}
+                {(!instructors || instructors.filter(i => i.id !== ogretimUyesiId).length === 0) && (
+                  <p className="text-xs text-muted-foreground italic">Müsait ek gözetmen bulunamadı.</p>
+                )}
+              </div>
             </div>
 
 

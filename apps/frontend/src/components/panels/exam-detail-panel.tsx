@@ -36,7 +36,7 @@ export function ExamDetailPanel({
   const { data: rooms } = useRooms();
   const { data: instructors } = useInstructors();
   const [isEditing, setIsEditing] = useState(false);
-  
+
   // Edit form state
   const [editTarih, setEditTarih] = useState('');
   const [editBaslangic, setEditBaslangic] = useState('');
@@ -45,6 +45,9 @@ export function ExamDetailPanel({
   const [editGozetmenIds, setEditGozetmenIds] = useState<string[]>([]);
   const [editOgretimUyesiId, setEditOgretimUyesiId] = useState('');
   const [editNotlar, setEditNotlar] = useState('');
+  const [editSinif, setEditSinif] = useState<number>(1);
+  const [editOgrenciSayilari, setEditOgrenciSayilari] = useState<number[]>([]);
+  const [capacityError, setCapacityError] = useState(false);
 
   useEffect(() => {
     if (currentExam) {
@@ -55,20 +58,22 @@ export function ExamDetailPanel({
         currentExam.derslikler && currentExam.derslikler.length > 0
           ? currentExam.derslikler.map((dr) => dr.derslikId).filter(Boolean)
           : currentExam.derslikId
-          ? [currentExam.derslikId]
-          : []
+            ? [currentExam.derslikId]
+            : []
       );
       setEditGozetmenIds(
         currentExam.gozetmenler?.map((g) => g.ogretimUyesiId).filter(Boolean) ?? []
       );
       setEditOgretimUyesiId(currentExam.ogretimUyesiId || '');
       setEditNotlar(currentExam.notlar || '');
+      setEditSinif(currentExam.sinif || 1);
+      setEditOgrenciSayilari(currentExam.ogrenciSayilari || Array(currentExam.sinif || 1).fill(1));
     }
   }, [currentExam]);
 
   const handleSave = () => {
     if (!onUpdate || !currentExam) return;
-    
+
     const payload: UpdateExamInput = {};
     if (editTarih !== (currentExam.tarih?.split('T')[0] || '')) {
       payload.tarih = editTarih || undefined;
@@ -80,8 +85,8 @@ export function ExamDetailPanel({
       payload.bitis = editBitis || undefined;
     }
     if (JSON.stringify(editDerslikIds.sort()) !== JSON.stringify(
-      (currentExam.derslikler?.map((dr) => dr.derslikId).filter(Boolean) ?? 
-       currentExam.derslikId ? [currentExam.derslikId] : []).sort()
+      (currentExam.derslikler?.map((dr) => dr.derslikId).filter(Boolean) ??
+        currentExam.derslikId ? [currentExam.derslikId] : []).sort()
     )) {
       payload.derslikIds = editDerslikIds;
     }
@@ -100,7 +105,30 @@ export function ExamDetailPanel({
     if (editNotlar !== (currentExam.notlar || '')) {
       payload.notlar = editNotlar || undefined;
     }
-    
+
+    // Kapasite Kontrolü
+    const totalStudents = editOgrenciSayilari.reduce((a, b) => a + b, 0);
+    const totalCapacity = editDerslikIds
+      .map((id) => rooms?.find((r) => r.id === id)?.kapasite || 0)
+      .reduce((a, b) => a + b, 0);
+
+    if (totalStudents > totalCapacity) {
+      setCapacityError(true);
+      alert(
+        `Yetersiz Derslik Kapasitesi!\n\nToplam Öğrenci: ${totalStudents}\nToplam Kapasite: ${totalCapacity}\n\nLütfen en az ${totalStudents - totalCapacity} kişilik daha yer sağlayacak ek derslik seçiniz.`
+      );
+      return;
+    }
+
+    setCapacityError(false);
+
+    if (editSinif !== currentExam.sinif) {
+      payload.sinif = editSinif;
+    }
+    if (JSON.stringify(editOgrenciSayilari) !== JSON.stringify(currentExam.ogrenciSayilari || [])) {
+      payload.ogrenciSayilari = editOgrenciSayilari;
+    }
+
     if (Object.keys(payload).length > 0) {
       onUpdate(payload);
       setIsEditing(false);
@@ -113,7 +141,7 @@ export function ExamDetailPanel({
     } else {
       const selectedRoom = rooms?.find((r) => r.id === roomId);
       const ogrenciKapasitesi = currentExam?.ders?.ogrenciKapasitesi;
-      
+
       // Kapasite kontrolü: Eğer öğrenci kapasitesi 30 veya daha az ise amfi seçilmesine izin verme
       if (selectedRoom && ogrenciKapasitesi && ogrenciKapasitesi <= 30) {
         if (selectedRoom.tip === 'amfi') {
@@ -121,17 +149,51 @@ export function ExamDetailPanel({
           return;
         }
       }
-      
+
       setEditDerslikIds([...editDerslikIds, roomId]);
     }
   };
 
   const handleGozetmenToggle = (instructorId: string) => {
+    // Sorumlu hoca gözetmen olarak seçilemez
+    if (instructorId === editOgretimUyesiId) return;
+
     if (editGozetmenIds.includes(instructorId)) {
       setEditGozetmenIds(editGozetmenIds.filter((id) => id !== instructorId));
     } else {
       setEditGozetmenIds([...editGozetmenIds, instructorId]);
     }
+  };
+
+  const handleOgretimUyesiChange = (id: string) => {
+    setEditOgretimUyesiId(id);
+    // Sorumlu hoca değiştiğinde, eğer gözetmenler arasındaysa oradan çıkar
+    if (editGozetmenIds.includes(id)) {
+      setEditGozetmenIds(editGozetmenIds.filter((gid) => gid !== id));
+    }
+  };
+
+  const handleSinifChange = (n: number) => {
+    setEditSinif(n);
+    setEditOgrenciSayilari((prev) => {
+      const next = [...prev];
+      if (n > prev.length) {
+        for (let i = prev.length; i < n; i++) {
+          next.push(1);
+        }
+      } else if (n < prev.length) {
+        return next.slice(0, n);
+      }
+      return next;
+    });
+  };
+
+  const handleOgrenciSayisiChange = (index: number, value: number) => {
+    setEditOgrenciSayilari((prev) => {
+      const next = [...prev];
+      next[index] = value;
+      return next;
+    });
   };
 
   const handleDelete = () => {
@@ -149,9 +211,8 @@ export function ExamDetailPanel({
   return (
     <div
       aria-hidden={!open}
-      className={`fixed inset-y-0 right-0 z-40 w-full max-w-xl transform border-l bg-background shadow-2xl transition-transform duration-200 ease-out ${
-        open ? 'translate-x-0' : 'translate-x-full'
-      }`}
+      className={`fixed inset-y-0 right-0 z-40 w-full max-w-xl transform border-l bg-background shadow-2xl transition-transform duration-200 ease-out ${open ? 'translate-x-0' : 'translate-x-full'
+        }`}
     >
       <div className="flex h-full flex-col">
         <header className="flex items-center justify-between border-b px-6 py-4">
@@ -251,15 +312,32 @@ export function ExamDetailPanel({
                     baslik="Dönem"
                     deger={donemLabel(currentExam.donem)}
                   />
-                  <DetailItem baslik="Sınıf" deger={String(currentExam.sinif)} />
-                  <DetailItem baslik="Tür" deger={typeLabel(currentExam.tur)} />
-                  <DetailItem 
-                    baslik="Öğrenci Kapasitesi" 
+                  <DetailItem
+                    baslik="Sınıf Adedi"
+                    deger={`${currentExam.sinif} şube`}
+                  />
+                  <DetailItem
+                    baslik="Öğrenci Sayıları"
                     deger={
-                      currentExam.ders?.ogrenciKapasitesi 
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {currentExam.ogrenciSayilari?.map((s, i) => (
+                          <Badge key={i} variant="outline" className="text-[10px]">
+                            Ş{i + 1}: {s}
+                          </Badge>
+                        ))}
+                        {!currentExam.ogrenciSayilari && <span>—</span>}
+                      </div>
+                    }
+                    sinifIsmi="md:col-span-2"
+                  />
+                  <DetailItem baslik="Tür" deger={typeLabel(currentExam.tur)} />
+                  <DetailItem
+                    baslik="Öğrenci Kapasitesi"
+                    deger={
+                      currentExam.ders?.ogrenciKapasitesi
                         ? `${currentExam.ders.ogrenciKapasitesi} öğrenci`
                         : 'Belirtilmemiş'
-                    } 
+                    }
                   />
                   <DurumControl
                     durum={currentExam.durum}
@@ -279,6 +357,40 @@ export function ExamDetailPanel({
                   </h3>
                   {isEditing ? (
                     <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-xs font-medium mb-1 block">Sınıf Adedi</label>
+                          <select
+                            value={editSinif}
+                            onChange={(e) => handleSinifChange(parseInt(e.target.value))}
+                            className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                          >
+                            {[1, 2, 3, 4, 5, 6].map((n) => (
+                              <option key={n} value={n}>
+                                {n} sınıf
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-xs font-medium block">Öğrenci Sayıları</label>
+                          <div className="grid grid-cols-3 gap-2">
+                            {Array.from({ length: editSinif }).map((_, idx) => (
+                              <div key={idx} className="space-y-1">
+                                <span className="text-[9px] text-muted-foreground uppercase font-bold">Ş{idx + 1}</span>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  value={editOgrenciSayilari[idx] || ''}
+                                  onChange={(e) => handleOgrenciSayisiChange(idx, parseInt(e.target.value) || 0)}
+                                  className="w-full rounded-md border bg-background px-2 py-1 text-xs"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
                       <div className="grid grid-cols-3 gap-4">
                         <div>
                           <label className="text-xs font-medium mb-1 block">Tarih</label>
@@ -308,28 +420,53 @@ export function ExamDetailPanel({
                       </div>
                       <div>
                         <label className="text-xs font-medium mb-2 block">Derslikler</label>
-                        <div className="space-y-2 max-h-32 overflow-y-auto border rounded-md p-2">
-                          {currentExam.ders?.ogrenciKapasitesi && (
-                            <div className="text-xs text-muted-foreground mb-2 pb-2 border-b">
-                              Dersin öğrenci kapasitesi: <strong>{currentExam.ders.ogrenciKapasitesi} öğrenci</strong>
-                              {currentExam.ders.ogrenciKapasitesi <= 30 && (
-                                <span className="text-amber-600 ml-1">(Amfi seçilemez)</span>
-                              )}
-                            </div>
-                          )}
+                        <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-2">
+                          {(() => {
+                            const totalStudents = editOgrenciSayilari.reduce((a, b) => a + b, 0);
+                            const totalCapacity = editDerslikIds
+                              .map((id) => rooms?.find((r) => r.id === id)?.kapasite || 0)
+                              .reduce((a, b) => a + b, 0);
+                            const isCapacityEnough = totalCapacity >= totalStudents;
+                            const ogrenciKapasitesi = currentExam.ders?.ogrenciKapasitesi;
+
+                            return (
+                              <div className="flex flex-col gap-2 mb-2 pb-2 border-b">
+                                {ogrenciKapasitesi && (
+                                  <div className="text-[10px] text-muted-foreground uppercase font-bold">
+                                    Dersin Kayıtlı Kapasitesi: {ogrenciKapasitesi}
+                                    {ogrenciKapasitesi <= 30 && (
+                                      <span className="text-amber-600 ml-1">(Amfi seçilemez)</span>
+                                    )}
+                                  </div>
+                                )}
+                                {capacityError && (
+                                  <div className={`text-xs font-semibold flex items-center justify-between p-2 rounded-md ${isCapacityEnough ? 'bg-emerald-50 text-emerald-700' : 'bg-destructive/10 text-destructive'}`}>
+                                    <span>
+                                      Öğrenci: {totalStudents} / Kapasite: {totalCapacity}
+                                    </span>
+                                    {!isCapacityEnough && (
+                                      <span className="animate-pulse">⚠️ {totalStudents - totalCapacity} eksik!</span>
+                                    )}
+                                    {isCapacityEnough && (
+                                      <span>✅ Yeterli</span>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })()}
                           {rooms?.map((r) => {
                             const ogrenciKapasitesi = currentExam.ders?.ogrenciKapasitesi;
                             const isDisabled = ogrenciKapasitesi && ogrenciKapasitesi <= 30 && r.tip === 'amfi';
                             const isSelected = editDerslikIds.includes(r.id);
-                            
+
                             return (
-                              <label 
-                                key={r.id} 
-                                className={`flex items-center gap-2 ${
-                                  isDisabled && !isSelected 
-                                    ? 'cursor-not-allowed opacity-50' 
-                                    : 'cursor-pointer'
-                                }`}
+                              <label
+                                key={r.id}
+                                className={`flex items-center gap-2 ${isDisabled && !isSelected
+                                  ? 'cursor-not-allowed opacity-50'
+                                  : 'cursor-pointer'
+                                  }`}
                               >
                                 <input
                                   type="checkbox"
@@ -339,9 +476,9 @@ export function ExamDetailPanel({
                                   className="rounded border-gray-300"
                                 />
                                 <span className="text-sm">
-                                  {r.ad} - {r.bina} (Kapasite: {r.kapasite}, Tip: {r.tip === 'amfi' ? 'Amfi' : r.tip === 'laboratuvar' ? 'Laboratuvar' : r.tip === 'sinif' ? 'Sınıf' : r.tip === 'toplanti' ? 'Toplantı' : 'Diğer'})
+                                  {r.ad} - {r.bina} (Kap: {r.kapasite})
                                   {isDisabled && !isSelected && (
-                                    <span className="text-xs text-amber-600 ml-1">(Seçilemez)</span>
+                                    <span className="text-[10px] text-amber-600 ml-1">(!Amfi)</span>
                                   )}
                                 </span>
                               </label>
@@ -377,15 +514,15 @@ export function ExamDetailPanel({
                         deger={
                           currentExam.derslikler && currentExam.derslikler.length > 0
                             ? currentExam.derslikler.map((dr, idx) => (
-                                <div key={dr.id || idx} className="mb-1">
-                                  <div className="font-medium">{dr.derslik?.ad ?? 'Bilinmeyen'}</div>
-                                  <div className="text-xs text-muted-foreground">
-                                    {dr.derslik?.bina ?? ''} - Kapasite: {dr.derslik?.kapasite ?? '—'}
-                                  </div>
+                              <div key={dr.id || idx} className="mb-1">
+                                <div className="font-medium">{dr.derslik?.ad ?? 'Bilinmeyen'}</div>
+                                <div className="text-xs text-muted-foreground">
+                                  {dr.derslik?.bina ?? ''} - Kapasite: {dr.derslik?.kapasite ?? '—'}
                                 </div>
-                              ))
+                              </div>
+                            ))
                             : currentExam.derslik?.ad
-                            ? (
+                              ? (
                                 <div>
                                   <div className="font-medium">{currentExam.derslik.ad}</div>
                                   <div className="text-xs text-muted-foreground">
@@ -393,7 +530,7 @@ export function ExamDetailPanel({
                                   </div>
                                 </div>
                               )
-                            : 'Atanmadı'
+                              : 'Atanmadı'
                         }
                         sinifIsmi="md:col-span-2"
                       />
@@ -420,7 +557,7 @@ export function ExamDetailPanel({
                       <select
                         required
                         value={editOgretimUyesiId}
-                        onChange={(e) => setEditOgretimUyesiId(e.target.value)}
+                        onChange={(e) => handleOgretimUyesiChange(e.target.value)}
                         className="w-full rounded-md border bg-background px-3 py-2 text-sm"
                       >
                         <option value="">Seçiniz</option>
@@ -432,19 +569,26 @@ export function ExamDetailPanel({
                       </select>
                     </div>
                     <div>
-                      <label className="text-xs font-medium mb-2 block">Gözetmenler</label>
-                      <div className="space-y-2 max-h-32 overflow-y-auto border rounded-md p-2">
-                        {instructors?.map((i) => (
-                          <label key={i.id} className="flex items-center gap-2 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={editGozetmenIds.includes(i.id)}
-                              onChange={() => handleGozetmenToggle(i.id)}
-                              className="rounded border-gray-300"
-                            />
-                            <span className="text-sm">{i.ad} ({i.email})</span>
-                          </label>
-                        ))}
+                      <label className="text-xs font-medium mb-2 block text-muted-foreground/80">
+                        Ek Gözetmenler (Sorumlu hoca hariç)
+                      </label>
+                      <div className="space-y-2 max-h-32 overflow-y-auto border rounded-md p-2 bg-muted/20">
+                        {instructors
+                          ?.filter(i => i.id !== editOgretimUyesiId)
+                          ?.map((i) => (
+                            <label key={i.id} className="flex items-center gap-2 cursor-pointer hover:bg-muted/50 p-1 rounded transition-colors">
+                              <input
+                                type="checkbox"
+                                checked={editGozetmenIds.includes(i.id)}
+                                onChange={() => handleGozetmenToggle(i.id)}
+                                className="rounded border-gray-300"
+                              />
+                              <span className="text-sm">{i.ad} <span className="text-[10px] text-muted-foreground">({i.bolum?.ad})</span></span>
+                            </label>
+                          ))}
+                        {(!instructors || instructors.filter(i => i.id !== editOgretimUyesiId).length === 0) && (
+                          <p className="text-xs text-muted-foreground italic">Müsait ek gözetmen bulunamadı.</p>
+                        )}
                       </div>
                     </div>
                   </div>

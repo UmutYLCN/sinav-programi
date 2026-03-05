@@ -357,6 +357,10 @@ export class ExamsService {
       sinav.sinif = dto.sinif ?? sinav.sinif;
     }
 
+    if (dto.ogrenciSayilari !== undefined) {
+      sinav.ogrenciSayilari = dto.ogrenciSayilari ?? null;
+    }
+
     if (dto.notlar !== undefined) {
       sinav.notlar = dto.notlar ?? null;
     }
@@ -720,7 +724,7 @@ export class ExamsService {
   async autoAssignInvigilators(dto: AutoAssignInvigilatorsDto) {
     const timezone =
       this.configService.get('TIMEZONE', { infer: true }) ?? DEFAULT_TIMEZONE;
-    const esikDeger = dto.esikDeger ?? 30; // Varsayılan eşik: 30 öğrenci
+
 
     // Filtrelere uyan sınavları bul
     const where: any = {
@@ -868,22 +872,23 @@ export class ExamsService {
 
     // Her sınav için gözetmen ata
     for (const exam of exams) {
-      // Sınıf adedi'ne göre gözetmen sayısını belirle
-      // sinif = 1: Sorumlu öğretim üyesi yeterli, ek gözetmen gerekmez
-      // sinif >= 2: Her sınıf için 1 gözetmen atanacak (sinif kadar gözetmen)
-      const sinifAdedi = Math.min(6, exam.sinif || 1);
+      // Sınıf adedi'ne göre değil, seçilen derslik sayısına göre gözetmen sayısını belirle
+      // Senaryo: N derslik varsa N gözetmen + 1 Baş Gözetmen (Principal)
+      const currentExamRooms = exam.derslikler || [];
+      const derslikSayisi = currentExamRooms.length;
 
       let gerekliGozetmenSayisi: number;
       let sorumluHocaGözetmenOlsun: boolean;
 
-      if (sinifAdedi === 1) {
-        // Tek sınıf: Sorumlu öğretim üyesi gözetmenlik yapar
+      if (derslikSayisi === 0) {
+        // Derslik seçilmemişse bile koordinasyon için sorumlu hoca atanmalı
         gerekliGozetmenSayisi = 0;
         sorumluHocaGözetmenOlsun = true;
       } else {
-        // Birden fazla sınıf: Her sınıf için 1 gözetmen
-        gerekliGozetmenSayisi = sinifAdedi;
-        sorumluHocaGözetmenOlsun = false;
+        // N derslik için N gözetmen + 1 Baş Gözetmen
+        // Toplamda derslikSayisi kadar normal gözetmen (ikincil) + 1 Baş Gözetmen (birincil)
+        gerekliGozetmenSayisi = derslikSayisi; // İhtiyaç duyulan ek gözetmenler
+        sorumluHocaGözetmenOlsun = true; // Sorumlu hoca her zaman koordinatör/baş gözetmen
       }
 
       // Sınav tarih/saat bilgisi

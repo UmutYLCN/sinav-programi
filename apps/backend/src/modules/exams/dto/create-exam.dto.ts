@@ -47,6 +47,12 @@ export class CreateExamDto {
   @Max(6, { message: 'Sınıf adedi en fazla 6 olabilir.' })
   sinif?: number;
 
+  @IsOptional()
+  @IsArray({ message: 'Öğrenci sayıları dizi olmalıdır.' })
+  @IsInt({ each: true, message: 'Öğrenci sayıları tam sayı olmalıdır.' })
+  @Min(1, { each: true, message: 'Öğrenci sayısı en az 1 olmalıdır.' })
+  ogrenciSayilari?: number[];
+
   @ValidateIf((o) => (o as CreateExamDto).tur === 'sinav')
   @IsNotEmpty({ message: 'Sınav tarihi zorunludur.' })
   @IsDateString({}, { message: 'Sınav tarihi ISO formatında olmalıdır.' })
