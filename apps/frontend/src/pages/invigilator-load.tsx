@@ -287,7 +287,7 @@ export default function InvigilatorLoadPage() {
             <div className="border-b px-6 py-4">
               <h3 className="text-lg font-semibold">Sınav Görevleri</h3>
               <p className="text-sm text-muted-foreground">
-                Baş gözetmen olduğu görevler rozet ile belirtilmiştir.
+                Gözetmen görevleri aşağıda listelenmiştir.
               </p>
             </div>
             {detailSkeleton ? (
@@ -329,15 +329,9 @@ export default function InvigilatorLoadPage() {
                         <Td>{`${assignment.sureDakika} dk`}</Td>
                         <Td>
                           <Badge
-                            variant={
-                              assignment.gozetmenRol === 'birincil'
-                                ? 'success'
-                                : 'secondary'
-                            }
+                            variant="secondary"
                           >
-                            {assignment.gozetmenRol === 'birincil'
-                              ? 'Baş Gözetmen'
-                              : 'Gözetmen'}
+                            Gözetmen
                           </Badge>
                         </Td>
                         <Td className="text-right">

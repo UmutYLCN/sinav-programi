@@ -289,7 +289,7 @@ export default function AutoAssignInvigilatorsPage() {
                           <div key={g.id}>
                             • {g.ad}{' '}
                             <Badge variant="outline" className="ml-1">
-                              {g.rol === 'birincil' ? 'Baş Gözetmen' : 'Gözetmen'}
+                              Gözetmen
                             </Badge>
                             {g.derslik && g.derslik !== '—' && (
                               <span className="ml-2 text-xs text-muted-foreground">

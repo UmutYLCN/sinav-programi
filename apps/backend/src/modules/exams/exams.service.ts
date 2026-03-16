@@ -708,13 +708,13 @@ export class ExamsService {
       where: { id: In(gozetmenIds) },
     });
 
-    const entities = instructors.map((ins, index) =>
+    const entities = instructors.map((ins) =>
       this.examInvigilatorRepository.create({
         sinav: exam,
         sinavId: exam.id,
         gozetmen: ins,
         ogretimUyesiId: ins.id,
-        rol: index === 0 ? 'birincil' : 'ikincil',
+        rol: 'ikincil',
       }),
     );
 
@@ -873,22 +873,17 @@ export class ExamsService {
     // Her sınav için gözetmen ata
     for (const exam of exams) {
       // Sınıf adedi'ne göre değil, seçilen derslik sayısına göre gözetmen sayısını belirle
-      // Senaryo: N derslik varsa N gözetmen + 1 Baş Gözetmen (Principal)
+      // Senaryo: N derslik varsa N gözetmen (sorumlu hoca gözetmen olarak atanmaz)
       const currentExamRooms = exam.derslikler || [];
       const derslikSayisi = currentExamRooms.length;
 
       let gerekliGozetmenSayisi: number;
-      let sorumluHocaGözetmenOlsun: boolean;
 
       if (derslikSayisi === 0) {
-        // Derslik seçilmemişse bile koordinasyon için sorumlu hoca atanmalı
         gerekliGozetmenSayisi = 0;
-        sorumluHocaGözetmenOlsun = true;
       } else {
-        // N derslik için N gözetmen + 1 Baş Gözetmen
-        // Toplamda derslikSayisi kadar normal gözetmen (ikincil) + 1 Baş Gözetmen (birincil)
-        gerekliGozetmenSayisi = derslikSayisi; // İhtiyaç duyulan ek gözetmenler
-        sorumluHocaGözetmenOlsun = true; // Sorumlu hoca her zaman koordinatör/baş gözetmen
+        // N derslik için N gözetmen
+        gerekliGozetmenSayisi = derslikSayisi;
       }
 
       // Sınav tarih/saat bilgisi
@@ -900,70 +895,7 @@ export class ExamsService {
       const examEnd = combineDateAndTime(exam.tarih!, exam.bitis!, timezone);
       const examDate = exam.tarih!;
 
-      // Sorumlu hocayı bul
-      const sorumluHoca = exam.ogretimUyesiId
-        ? allInstructors.find((i) => i.id === exam.ogretimUyesiId)
-        : null;
-
-      // Sorumlu hocanın müsait olup olmadığını kontrol et (eğer gözetmen olarak atanacaksa)
-      let sorumluHocaMusait = false;
-      if (sorumluHocaGözetmenOlsun && sorumluHoca) {
-        // Günlük maksimum kontrolü
-        const gunlukYuk =
-          gozetmenGunlukYukleri[sorumluHoca.id]?.[examDate] ?? 0;
-        if (gunlukYuk < 4) {
-          // Müsait değil kayıtları kontrol et
-          const kisiMusaitDegil = unavailabilities.filter(
-            (u) => u.ogretimUyesiId === sorumluHoca.id,
-          );
-          const engel = kisiMusaitDegil.some((kayit) => {
-            const kayitBaslangic = DateTime.fromJSDate(kayit.baslangic, {
-              zone: timezone,
-            });
-            const kayitBitis = DateTime.fromJSDate(kayit.bitis, {
-              zone: timezone,
-            });
-            const kayitTarih = kayitBaslangic.toISODate();
-            return (
-              kayitTarih === examDate &&
-              durationsOverlap(examStart, examEnd, kayitBaslangic, kayitBitis)
-            );
-          });
-
-          // Mevcut sınav çakışmaları kontrol et
-          const ilgiliSinavlar = existingAssignments.filter(
-            (a) =>
-              a.ogretimUyesiId === sorumluHoca.id &&
-              a.sinav.tarih === examDate &&
-              a.sinav.baslangic &&
-              a.sinav.bitis,
-          );
-          const sinavCakisma = ilgiliSinavlar.some((a) => {
-            const sinavBaslangic = combineDateAndTime(
-              a.sinav.tarih!,
-              a.sinav.baslangic!,
-              timezone,
-            );
-            const sinavBitis = combineDateAndTime(
-              a.sinav.tarih!,
-              a.sinav.bitis!,
-              timezone,
-            );
-            return durationsOverlap(examStart, examEnd, sinavBaslangic, sinavBitis);
-          });
-
-          // Session çakışma kontrolü
-          const sessionConflict = sessionAssignments.some((sa) => {
-            return (
-              sa.instructorId === sorumluHoca.id &&
-              sa.examDate === examDate &&
-              durationsOverlap(examStart, examEnd, sa.examStart, sa.examEnd)
-            );
-          });
-
-          sorumluHocaMusait = !engel && !sinavCakisma && !sessionConflict;
-        }
-      }
+      // Sorumlu hoca gözetmen olarak atanmayacak, sadece öğretim üyesi olarak kalacak
 
       // Müsait gözetmenleri bul
       const musaitGozetmenler = allInstructors.filter((instructor) => {
@@ -1066,25 +998,12 @@ export class ExamsService {
       // Gözetmenleri seç ve ata
       const secilenGozetmenler: Array<{ instructor: Instructor; rol: 'birincil' | 'ikincil' }> = [];
 
-      // Eğer sorumlu hoca gözetmen olarak atanacaksa, onu baş gözetmen olarak ekle
-      if (sorumluHocaGözetmenOlsun && sorumluHoca && sorumluHocaMusait) {
-        secilenGozetmenler.push({
-          instructor: sorumluHoca,
-          rol: 'birincil',
-        });
-      }
+      // Gözetmenleri seç (sorumlu hoca gözetmen olarak atanmaz)
+      if (gerekliGozetmenSayisi > 0) {
+        const secilenNormalGozetmenler = musaitGozetmenler.slice(0, gerekliGozetmenSayisi);
 
-      // Kalan gözetmen sayısını hesapla
-      const kalanGozetmenSayisi = gerekliGozetmenSayisi - secilenGozetmenler.length;
-
-      // Normal gözetmenleri seç
-      if (kalanGozetmenSayisi > 0) {
-        const secilenNormalGozetmenler = musaitGozetmenler.slice(0, kalanGozetmenSayisi);
-
-        if (secilenNormalGozetmenler.length < kalanGozetmenSayisi) {
-          const sebep = sorumluHocaGözetmenOlsun && sorumluHoca && !sorumluHocaMusait
-            ? `Sorumlu hoca müsait olmadığı için yeterli gözetmen bulunamadı. Gerekli: ${gerekliGozetmenSayisi}, Bulunan: ${secilenGozetmenler.length + secilenNormalGozetmenler.length}`
-            : `Yeterli müsait gözetmen bulunamadı. Gerekli: ${gerekliGozetmenSayisi}, Bulunan: ${secilenGozetmenler.length + secilenNormalGozetmenler.length}`;
+        if (secilenNormalGozetmenler.length < gerekliGozetmenSayisi) {
+          const sebep = `Yeterli müsait gözetmen bulunamadı. Gerekli: ${gerekliGozetmenSayisi}, Bulunan: ${secilenNormalGozetmenler.length}`;
 
           atanamayanlar.push({
             sinavId: exam.id,
@@ -1094,11 +1013,11 @@ export class ExamsService {
           continue;
         }
 
-        // Normal gözetmenleri ekle (sorumlu hoca varsa ikincil, yoksa birincil başlar)
-        secilenNormalGozetmenler.forEach((instructor, index) => {
+        // Tüm gözetmenleri 'ikincil' (normal gözetmen) olarak ekle
+        secilenNormalGozetmenler.forEach((instructor) => {
           secilenGozetmenler.push({
             instructor,
-            rol: secilenGozetmenler.length === 0 && index === 0 ? 'birincil' : 'ikincil',
+            rol: 'ikincil',
           });
         });
       }

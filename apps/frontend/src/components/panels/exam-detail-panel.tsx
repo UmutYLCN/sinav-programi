@@ -603,7 +603,7 @@ export function ExamDetailPanel({
                       currentExam.gozetmenler.map((gozetmen) => (
                         <DetailItem
                           key={`${gozetmen.ogretimUyesiId}-${gozetmen.rol}`}
-                          baslik={gozetmen.rol === 'birincil' ? 'Baş Gözetmen' : 'Gözetmen'}
+                          baslik="Gözetmen"
                           deger={gozetmen.gozetmen?.ad ?? 'Atanmadı'}
                           sinifIsmi="md:col-span-2"
                         />
