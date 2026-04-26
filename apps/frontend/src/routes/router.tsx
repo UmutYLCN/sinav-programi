@@ -10,7 +10,6 @@ import PlanimPage from '@/pages/planim';
 import UnavailabilityPage from '@/pages/unavailability';
 import InvigilatorLoadPage from '@/pages/invigilator-load';
 import DataManagementPage from '@/pages/data-management';
-import AutoAssignInvigilatorsPage from '@/pages/auto-assign-invigilators';
 import LoginPage from '@/pages/login';
 import { AuthGuard } from '@/components/auth/auth-guard';
 
@@ -32,7 +31,6 @@ const router = createBrowserRouter([
       { path: 'planim', element: <PlanimPage /> },
       { path: 'unavailability', element: <UnavailabilityPage /> },
       { path: 'invigilator-load', element: <InvigilatorLoadPage /> },
-      { path: 'auto-assign-invigilators', element: <AutoAssignInvigilatorsPage /> },
       { path: 'data', element: <DataManagementPage /> },
       { path: '*', element: <Navigate to="/" replace /> },
     ],

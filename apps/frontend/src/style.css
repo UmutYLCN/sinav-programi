@@ -75,3 +75,94 @@
     text-wrap: balance;
   }
 }
+
+/* ──────────────────────────────────────────────
+   FullCalendar özelleştirmeleri
+   ────────────────────────────────────────────── */
+.fc {
+  --fc-border-color: hsl(var(--border));
+  --fc-page-bg-color: hsl(var(--card));
+  --fc-neutral-bg-color: hsl(var(--muted));
+  --fc-list-event-hover-bg-color: hsl(var(--accent));
+  --fc-today-bg-color: hsl(var(--primary) / 0.06);
+  --fc-now-indicator-color: hsl(var(--destructive));
+  font-family: inherit;
+  font-size: 0.8125rem;
+}
+
+/* Gün başlıkları */
+.fc .fc-col-header-cell {
+  background: hsl(var(--muted) / 0.5);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 8px 0;
+}
+
+.fc .fc-col-header-cell-cushion {
+  color: hsl(var(--muted-foreground));
+  text-decoration: none;
+}
+
+/* Bugün sütunu başlığı */
+.fc .fc-day-today .fc-col-header-cell-cushion {
+  color: hsl(var(--primary));
+}
+
+/* Saat etiketleri */
+.fc .fc-timegrid-slot-label-cushion {
+  color: hsl(var(--muted-foreground));
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Etkinlik kartları */
+.fc .fc-timegrid-event {
+  border-radius: 6px;
+  border-width: 0;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.15);
+}
+
+.fc .fc-timegrid-event .fc-event-main {
+  padding: 0;
+}
+
+/* Etkinlik tıklama imleci */
+.fc-event {
+  cursor: pointer;
+}
+
+/* Şu anki zaman çizgisi */
+.fc .fc-timegrid-now-indicator-line {
+  border-color: hsl(var(--destructive));
+  border-width: 2px;
+}
+
+.fc .fc-timegrid-now-indicator-arrow {
+  border-color: hsl(var(--destructive));
+}
+
+/* Grid çizgileri */
+.fc .fc-timegrid-slot {
+  height: 2.25rem;
+}
+
+.fc .fc-timegrid-slot-minor {
+  border-top-style: dashed;
+  border-top-color: hsl(var(--border) / 0.5);
+}
+
+/* Scrollbar görünümünü gizle */
+.fc .fc-scroller::-webkit-scrollbar {
+  width: 4px;
+}
+.fc .fc-scroller::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 2px;
+}
+
+/* Bugün sütunu */
+.fc .fc-day-today {
+  background: hsl(var(--primary) / 0.04) !important;
+}

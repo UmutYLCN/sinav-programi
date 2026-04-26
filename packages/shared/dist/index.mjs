@@ -183,6 +183,7 @@ var ExamSchema = WithTimestampsSchema.extend({
   onayli: z11.boolean().default(false),
   cakismaOnayli: z11.boolean().default(false),
   // Kontrollü çakışma onayı
+  ogrenciSayilari: z11.array(z11.number().int().min(1)).nullable().optional(),
   notlar: z11.string().nullable().optional(),
   teslimLinki: z11.string().url().nullable().optional(),
   teslimTarihi: z11.string().datetime().nullable().optional()

@@ -1,20 +1,26 @@
 import { useMemo, useState } from 'react';
-import React from 'react';
-import type { ReactNode } from 'react';
 import {
   DONEMLER,
   EXAM_DURUM_LISTESI,
   EXAM_TUR_LISTESI,
   type Exam,
 } from '@sinav/shared';
-import { useExamDetail, useExams, useUpdateExam, useDeleteExam } from '@/services/exams';
+import { useExamDetail, useExams, useUpdateExam } from '@/services/exams';
 import { useDepartments } from '@/services/departments';
-import type { ExamConflict } from '@sinav/shared';
 import { Badge } from '@/components/ui/badge';
 import { ExamDetailPanel } from '@/components/panels/exam-detail-panel';
 import { AddExamForm } from '@/components/forms/add-exam-form';
+import { AutoAssignDialog } from '@/components/forms/auto-assign-dialog';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import {
+  CalendarDays,
+  Clock,
+  DoorOpen,
+  Users,
+  BookOpen,
+  AlertTriangle,
+} from 'lucide-react';
 
 type FilterState = {
   donem: string;
@@ -40,10 +46,10 @@ export default function ExamsPage() {
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [selectedExamId, setSelectedExamId] = useState<string | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showAutoAssignDialog, setShowAutoAssignDialog] = useState(false);
   const { data: departments } = useDepartments();
   const { data, isLoading, isError, error } = useExams(filters);
   const updateExam = useUpdateExam();
-  const deleteExam = useDeleteExam();
   const {
     data: selectedExamDetail,
     status: detailStatus,
@@ -275,125 +281,87 @@ export default function ExamsPage() {
         <div className="border-b px-6 py-4 flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold">
-              Sınav Listesi ({filteredExams.length})
+              Sınav Listesi{' '}
+              <span className="text-muted-foreground font-normal text-base">
+                ({filteredExams.length})
+              </span>
             </h2>
             <p className="text-sm text-muted-foreground">
-              Satıra tıklayarak detaylara ulaşabilirsiniz.
+              Karta tıklayarak detaylara ulaşabilirsiniz.
             </p>
           </div>
-          <Button onClick={() => setShowAddDialog(true)}>
-            Yeni Sınav Ekle
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="secondary" onClick={() => setShowAutoAssignDialog(true)}>
+              Otomatik Gözetmen Ata
+            </Button>
+            <Button onClick={() => setShowAddDialog(true)}>
+              Yeni Sınav Ekle
+            </Button>
+          </div>
         </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y text-sm">
-            <thead className="bg-muted/50 text-muted-foreground">
-              <tr>
-                <Th>Fakülte / Bölüm</Th>
-                <Th>Ders</Th>
-                <Th>Dönem</Th>
-                <Th>Tarih</Th>
-                <Th>Saat</Th>
-                <Th>Derslik</Th>
-                <Th>Gözetmen</Th>
-                <Th>Durum</Th>
-                <Th>Tür</Th>
-              </tr>
-            </thead>
-            <tbody className="divide-y bg-card">
-              {isLoading && (
-                <tr>
-                  <td
-                    colSpan={9}
-                    className="px-6 py-6 text-center text-muted-foreground"
-                  >
-                    Sınavlar yükleniyor…
-                  </td>
-                </tr>
-              )}
-              {isError && (
-                <tr>
-                  <td
-                    colSpan={9}
-                    className="px-6 py-6 text-center text-destructive"
-                  >
-                    {(error as Error)?.message ??
-                      'Sınav listesi alınırken hata oluştu.'}
-                  </td>
-                </tr>
-              )}
-              {!isLoading &&
-                !isError &&
-                (filters.cakismaVar || filters.gozetmenEksik ? (
-                  // Show problem exams in a single list
-                  problemExams.length > 0 ? (
-                    problemExams.map((exam) => (
-                      <ExamRow
-                        key={exam.id}
-                        exam={exam}
-                        selected={exam.id === selectedExamId}
-                        onSelect={() => setSelectedExamId(exam.id)}
-                        onDelete={() => {
-                          if (confirm('Bu sınavı silmek istediğinizden emin misiniz?')) {
-                            deleteExam.mutate(exam.id);
-                            if (selectedExamId === exam.id) {
-                              setSelectedExamId(null);
-                            }
-                          }
-                        }}
-                      />
-                    ))
-                  ) : (
-                    <tr>
-                      <td
-                        colSpan={9}
-                        className="px-6 py-6 text-center text-muted-foreground"
-                      >
-                        Sorunlu sınav bulunamadı.
-                      </td>
-                    </tr>
-                  )
-                ) : (
-                  // Show grouped exams by department
-                  groupedExams.length > 0 ? (
-                    groupedExams.map(([deptName, exams]) => (
-                      <React.Fragment key={deptName}>
-                        <tr className="bg-muted/30">
-                          <td colSpan={9} className="px-6 py-3 font-semibold">
-                            {deptName}
-                          </td>
-                        </tr>
+
+        <div className="p-6">
+          {isLoading && (
+            <p className="text-center text-muted-foreground py-12">
+              Sınavlar yükleniyor…
+            </p>
+          )}
+          {isError && (
+            <p className="text-center text-destructive py-12">
+              {(error as Error)?.message ?? 'Sınav listesi alınırken hata oluştu.'}
+            </p>
+          )}
+          {!isLoading && !isError && (
+            filters.cakismaVar || filters.gozetmenEksik ? (
+              problemExams.length > 0 ? (
+                <div className="grid gap-3 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+                  {problemExams.map((exam) => (
+                    <ExamCard
+                      key={exam.id}
+                      exam={exam}
+                      selected={exam.id === selectedExamId}
+                      onSelect={() => setSelectedExamId(exam.id)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center text-muted-foreground py-12">
+                  Sorunlu sınav bulunamadı.
+                </p>
+              )
+            ) : (
+              groupedExams.length > 0 ? (
+                <div className="space-y-8">
+                  {groupedExams.map(([deptName, exams]) => (
+                    <div key={deptName}>
+                      <div className="flex items-center gap-2 mb-3">
+                        <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                          {deptName}
+                        </h3>
+                        <span className="text-xs bg-muted rounded-full px-2 py-0.5 text-muted-foreground">
+                          {exams.length} sınav
+                        </span>
+                      </div>
+                      <div className="grid gap-3 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
                         {exams.map((exam) => (
-                          <ExamRow
+                          <ExamCard
                             key={exam.id}
                             exam={exam}
                             selected={exam.id === selectedExamId}
                             onSelect={() => setSelectedExamId(exam.id)}
-                            onDelete={() => {
-                              if (confirm('Bu sınavı silmek istediğinizden emin misiniz?')) {
-                                deleteExam.mutate(exam.id);
-                                if (selectedExamId === exam.id) {
-                                  setSelectedExamId(null);
-                                }
-                              }
-                            }}
                           />
                         ))}
-                      </React.Fragment>
-                    ))
-                  ) : (
-                    <tr>
-                      <td
-                        colSpan={9}
-                        className="px-6 py-6 text-center text-muted-foreground"
-                      >
-                        Kriterlere uygun sınav bulunamadı.
-                      </td>
-                    </tr>
-                  )
-                ))}
-            </tbody>
-          </table>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center text-muted-foreground py-12">
+                  Kriterlere uygun sınav bulunamadı.
+                </p>
+              )
+            )
+          )}
         </div>
       </div>
 
@@ -419,103 +387,118 @@ export default function ExamsPage() {
       />
 
       <AddExamForm open={showAddDialog} onOpenChange={setShowAddDialog} />
+      <AutoAssignDialog open={showAutoAssignDialog} onOpenChange={setShowAutoAssignDialog} />
     </section>
   );
 }
 
-function ExamRow({
+function ExamCard({
   exam,
   selected,
   onSelect,
-  onDelete,
 }: {
   exam: Exam;
   selected: boolean;
   onSelect: () => void;
-  onDelete: () => void;
 }) {
   const start = formatTime(exam.baslangic);
   const end = formatTime(exam.bitis);
 
-  // Get all rooms (from both old derslik and new derslikler)
   const rooms = exam.derslikler && exam.derslikler.length > 0
     ? exam.derslikler.map((dr) => dr.derslik?.ad).filter(Boolean).join(', ')
-    : exam.derslik?.ad ?? 'Atanmadı';
+    : exam.derslik?.ad ?? null;
 
-  // Get all proctors - show them vertically
   const proctors = exam.gozetmenler && exam.gozetmenler.length > 0
-    ? exam.gozetmenler.map((g) => g.gozetmen?.ad).filter(Boolean)
+    ? exam.gozetmenler.map((g) => g.gozetmen?.ad).filter(Boolean) as string[]
     : [];
 
+  const accentColor =
+    exam.durum === 'yayinlandi'
+      ? 'border-l-green-500'
+      : exam.durum === 'taslak'
+      ? 'border-l-amber-500'
+      : 'border-l-border';
+
   return (
-    <tr
+    <div
       className={cn(
-        'cursor-pointer hover:bg-muted/40',
-        selected && 'bg-muted/60',
+        'rounded-lg border border-l-4 bg-card p-4 cursor-pointer',
+        'transition-all duration-150 hover:shadow-md hover:border-primary/30',
+        accentColor,
+        selected && 'ring-2 ring-primary/30 border-primary/50 bg-primary/[0.03] shadow-sm',
       )}
       onClick={onSelect}
-      onKeyDown={(event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          onSelect();
-        }
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(); }
       }}
       role="button"
       tabIndex={0}
     >
-      <Td>
-        <div className="font-medium">{exam.ders?.bolum?.fakulte?.ad}</div>
-        <div className="text-xs text-muted-foreground">
-          {exam.ders?.bolum?.ad ?? '—'}
+      {/* Course header */}
+      <div className="flex items-start justify-between gap-2 mb-3">
+        <div className="min-w-0">
+          <div className="font-semibold text-sm leading-snug truncate">
+            {exam.ders?.ad ?? '—'}
+          </div>
+          <div className="text-xs text-muted-foreground mt-0.5">
+            {exam.ders?.kod ?? ''}
+            {exam.sinif ? ` · ${exam.sinif}. Sınıf` : ''}
+          </div>
         </div>
-      </Td>
-      <Td>
-        <div className="font-medium">{exam.ders?.ad ?? '—'}</div>
-        <div className="text-xs text-muted-foreground">{exam.ders?.kod}</div>
-      </Td>
-      <Td>{donemLabel(exam.donem)}</Td>
-      <Td>{formatTarih(exam.tarih)}</Td>
-      <Td>{start && end ? `${start} - ${end}` : 'Belirsiz'}</Td>
-      <Td className="max-w-xs">
-        <div className="truncate" title={rooms}>{rooms}</div>
-      </Td>
-      <Td className="max-w-xs">
+        <Badge variant={statusVariant(exam.durum)} className="shrink-0 text-xs">
+          {statusLabel(exam.durum)}
+        </Badge>
+      </div>
+
+      {/* Info rows */}
+      <div className="grid grid-cols-2 gap-y-1.5 gap-x-3 text-xs mb-3">
+        <span className="flex items-center gap-1.5 text-muted-foreground">
+          <CalendarDays className="h-3 w-3 shrink-0" />
+          {formatTarih(exam.tarih)}
+        </span>
+        <span className="flex items-center gap-1.5 text-muted-foreground">
+          <Clock className="h-3 w-3 shrink-0" />
+          {start && end ? `${start} – ${end}` : 'Belirsiz'}
+        </span>
+        <span className="flex items-center gap-1.5 text-muted-foreground col-span-2 truncate" title={rooms ?? undefined}>
+          <DoorOpen className="h-3 w-3 shrink-0" />
+          {rooms ?? <span className="italic">Derslik atanmadı</span>}
+        </span>
+        <span className="flex items-center gap-1.5 text-muted-foreground">
+          <BookOpen className="h-3 w-3 shrink-0" />
+          {typeLabel(exam.tur)}
+        </span>
+        <span className="flex items-center gap-1.5 text-muted-foreground">
+          {donemLabel(exam.donem)}
+        </span>
+      </div>
+
+      {/* Invigilators */}
+      <div className="border-t pt-2.5">
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1.5">
+          <Users className="h-3 w-3" />
+          <span>Gözetmenler</span>
+        </div>
         {proctors.length > 0 ? (
-          <div className="flex flex-col gap-0.5">
-            {proctors.map((name, idx) => (
-              <div key={idx} className="text-xs">{name}</div>
+          <div className="flex flex-wrap gap-1">
+            {proctors.map((name, i) => (
+              <span
+                key={i}
+                className="bg-muted rounded-full px-2 py-0.5 text-xs font-medium"
+              >
+                {name}
+              </span>
             ))}
           </div>
         ) : (
-          <span className="text-muted-foreground">Atanmadı</span>
+          <div className="flex items-center gap-1 text-xs text-amber-600 font-medium">
+            <AlertTriangle className="h-3 w-3" />
+            Gözetmen atanmadı
+          </div>
         )}
-      </Td>
-      <Td>
-        <Badge variant={statusVariant(exam.durum)}>{statusLabel(exam.durum)}</Badge>
-      </Td>
-      <Td>
-        <Badge variant="secondary">{typeLabel(exam.tur)}</Badge>
-      </Td>
-    </tr>
+      </div>
+    </div>
   );
-}
-
-function Th({ children }: { children: ReactNode }) {
-  return (
-    <th scope="col" className="px-6 py-3 text-left text-xs font-semibold">
-      {children}
-    </th>
-  );
-}
-
-function Td({
-  children,
-  className,
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
-  return <td className={cn('px-6 py-4 align-top', className)}>{children}</td>;
 }
 
 function donemLabel(value: string) {

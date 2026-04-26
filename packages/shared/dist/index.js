@@ -248,6 +248,7 @@ var ExamSchema = WithTimestampsSchema.extend({
   onayli: import_zod11.z.boolean().default(false),
   cakismaOnayli: import_zod11.z.boolean().default(false),
   // Kontrollü çakışma onayı
+  ogrenciSayilari: import_zod11.z.array(import_zod11.z.number().int().min(1)).nullable().optional(),
   notlar: import_zod11.z.string().nullable().optional(),
   teslimLinki: import_zod11.z.string().url().nullable().optional(),
   teslimTarihi: import_zod11.z.string().datetime().nullable().optional()

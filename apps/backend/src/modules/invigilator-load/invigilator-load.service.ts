@@ -166,11 +166,11 @@ export class InvigilatorLoadService {
       .leftJoinAndSelect('derslikler.derslik', 'dersliklerDerslik')
       .leftJoinAndSelect('gorev.gozetmen', 'gozetmen')
       .leftJoinAndSelect('sinav.ortakGrup', 'ortakGrup')
-      .where('sinav.tur = :tur', { tur: 'sinav' })
-      .andWhere('sinav.tarih IS NOT NULL')
+      .leftJoinAndSelect('gozetmen.bolum', 'gozetmenBolum')
+      .leftJoinAndSelect('gozetmenBolum.fakulte', 'gozetmenFakulte')
+      .where('sinav.tarih IS NOT NULL')
       .andWhere('sinav.baslangic IS NOT NULL')
       .andWhere('sinav.bitis IS NOT NULL')
-      .andWhere('sinav.durum != :durum', { durum: 'planlanmadi' })
       .getMany();
 
     const unique = new Map<string, AssignmentWithMeta>();

@@ -6,7 +6,6 @@ import {
   Users,
   Ban,
   Layers,
-  UserCheck,
 } from 'lucide-react';
 
 export type NavItem = {
@@ -46,12 +45,6 @@ export const NAV_ITEMS: NavItem[] = [
     description: 'Toplam görev süreleri ve sınav sayıları',
     icon: Users,
     path: '/invigilator-load',
-  },
-  {
-    title: 'Otomatik Gözetmen Atama',
-    description: 'Sınavlara gözetmenleri otomatik olarak ata',
-    icon: UserCheck,
-    path: '/auto-assign-invigilators',
   },
   {
     title: 'Veri Yönetimi',

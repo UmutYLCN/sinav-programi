@@ -1,0 +1,258 @@
+kod,ad,bolumKod,sinif,donem
+MAT101,Matematik I,BM,1,guz
+FIZ101,Fizik I,BM,1,guz
+TRD101,Türk Dili I,BM,1,guz
+ATA101,Atatürk İlkeleri ve İnkılap Tarihi I,BM,1,guz
+ING101,Temel İngilizce I,BM,1,guz
+BYM101,Bilgisayar Programlama I,BM,1,guz
+BIL101,Bilgisayar Mühendisliğine Giriş,BM,1,guz
+BYM201,Nesne Yönelimli Programlama,BM,2,guz
+MAT205,Ayrık Matematik,BM,2,guz
+MEK201,Elektronik Devreler,BM,2,guz
+MAT201,Lineer Cebir,BM,2,guz
+ISG201,İş Sağlığı Güvenliği,BM,2,guz
+BYM402,Programlama Dillerinin Temelleri,BM,2,guz
+BYM301,Veritabanı Yönetimi,BM,3,guz
+BYM303,Algoritma Analizi,BM,3,guz
+BIL305,Yazılım Proje Yönetimi,BM,3,guz
+MAT301,Olasılık ve İstatistik,BM,3,guz
+BIL301,Bilgisayar Mimarisi,BM,3,guz
+BYM448,Biçimsel Diller ve Otomata Teorisi,BM,4,guz
+BYM455,Bulut Bilişim,BM,4,guz
+BYM464,Paralel Programlama,BM,4,guz
+BYM487,Derin Öğrenmeye Giriş,BM,4,guz
+BYM412,Robotik,BM,4,guz
+BYM452,Doğal Dil İşleme,BM,4,guz
+CSE101,Computer Programming I,CE,1,guz
+COE101,Introduction to Computer Engineering,CE,1,guz
+MTH101,Mathematics I,CE,1,guz
+PHY101,Physics I,CE,1,guz
+TRD111,Turkish Language I,CE,1,guz
+ATA111,Principles of Atatürk and History of Turkish Revolution I,CE,1,guz
+ENG151,Academic English I,CE,1,guz
+MCH201,Electronic Circuits,CE,2,guz
+CSE201,Object Oriented Programming,CE,2,guz
+MTH205,Discrete Mathematics,CE,2,guz
+MTH201,Linear Algebra,CE,2,guz
+OHS201,Occupational Health and Safety I,CE,2,guz
+CSE402,Pirinciples of  Programming Languages,CE,2,guz
+CSE301,Database Management,CE,3,guz
+CSE303,Algorithm Analysis,CE,3,guz
+COE305,Software Project Management,CE,3,guz
+MTH301,Probability and Statistics,CE,3,guz
+COE301,Computer Architecture,CE,3,guz
+CSE455,Cloud İnformation,CE,4,guz
+CSE452,Natural Languages Proccesing,CE,4,guz
+CSE412,Robotics,CE,4,guz
+CSE487,Introduction to Deep Learning,CE,4,guz
+CSE448,Formal Languages and Automata Theory,CE,4,guz
+ENM101,Endüstri Mühendisliğine Giriş,END,1,guz
+KIM103,Genel Kimya,END,1,guz
+KRY101,Kariyer Planlama,END,1,guz
+MAT203,Diferansiyel Denklemler,END,2,guz
+ENM205,Üretim Sistemleri,END,2,guz
+ENM209,Yapısal Programlama,END,2,guz
+ENM207,İş Etüdü ve Ergonomi,END,2,guz
+ENM307,Kalite Sistemlerinin Tasarımı ve Yönetimi,END,3,guz
+ENM301,Yöneylem Araştırması II,END,3,guz
+ENM315,Mühendislik Ekonomisi,END,3,guz
+ENM305,Üretim Planlama ve Kontrol,END,3,guz
+ENM309,Tedarik Zinciri Yönetimi,END,3,guz
+ENM465,İnsan Kaynakları Yönetimi,END,4,guz
+ENM451,Kurumsal Kaynak Planlama,END,4,guz
+ENM455,Fizibilite Yönetimi,END,4,guz
+IND101,Introduction to Industrial ENgineering,IE,1,guz
+CPL101,Career Planning,IE,1,guz
+CHM103,General Chemistry,IE,1,guz
+MTH203,Differantial Equations,IE,2,guz
+IND203,Work Study and Ergonomics,IE,2,guz
+IND209,Structured Programming,IE,2,guz
+IND305,Production Planning Control,IE,3,guz
+IND303,Engineering Economics,IE,3,guz
+IND307,Design and Management of Quality Systems,IE,3,guz
+IND309,Supply Chain Management,IE,3,guz
+IND301,Operations Research II,IE,3,guz
+ETM155,İletişim Teknik ve Teknolojileri I,ETM,1,guz
+ETM105,Temel Tasarım I (Section I),ETM,1,guz
+ETM185,Endüstriyel Tasarım Mühendisliğine Giriş,ETM,1,guz
+ETM255,İletişim Teknik ve Teknolojileri III,ETM,2,guz
+ETM245,Tasarım Teknolojisi II,ETM,2,guz
+MEK213,Statik ve Mukavemet,ETM,2,guz
+ETM235,Tasarım Tarihi I,ETM,2,guz
+ETM265,Tasarım Yöntem,ETM,2,guz
+ETM205,Ürün Tasarımı I (Section III),ETM,2,guz
+ETM206,Ürün Tasarımı II (Irregular),ETM,2,guz
+ETM305,Ürün Tasarımı III (Section I),ETM,3,guz
+ETM325,Tasarım Deneyimi,ETM,3,guz
+ETM395,Minimal Ürün Tasarımı,ETM,3,guz
+ETM345,Tasarım Teknolojisi IV,ETM,3,guz
+ETM367,Makine Elemanları,ETM,3,guz
+ETM317,Tersine Mühendislik ve Hızlı Prototipleme,ETM,3,guz
+ETM319,Tersine Mühendislik ve Hızlı Prototipleme,ETM,3,guz
+ETM355,İleri İletişim Teknikleri,ETM,3,guz
+ETM316,Ürün Tasarımı IV (Irregular),ETM,3,guz
+ETM313,Moda Aksesuarları Tasarımı,ETM,3,guz
+ETM463,Ambalaj Tasarımı,ETM,4,guz
+ETM465,Yeni Ürün Geliştirme,ETM,4,guz
+MAK205,Termodinamik,ETM,4,guz
+ETM405,Ürün Tasarımı V,ETM,4,guz
+ETM406,Bitirme Projesi (Irregular),ETM,4,guz
+ETM445,Sistematik Tasarım,ETM,4,guz
+MAK101,Makine Mühendisliğine Giriş,MAK,1,guz
+MAK103,Bilgisayar Destekli Teknik Resim I,MAK,1,guz
+MAK209,Mukavemet,MAK,2,guz
+MAK213,Malzeme Bilimi,MAK,2,guz
+MAK219,Termodinamik I,MAK,2,guz
+MAK217,Makine Laboratuvarı I,MAK,2,guz
+MAK307,Makine Elemanları,MAK,3,guz
+MAK313,Makine Laboratuvarı II,MAK,3,guz
+MAK311,Isı Geçişi,MAK,3,guz
+MAK301,Akışkanlar Mekaniği,MAK,3,guz
+MEK472,Sensörler ve Aktüatörler,MAK,4,guz
+MAK488,Isıtma ve Havalandırma,MAK,4,guz
+MAK472,Hesaplamalı Isı ve Akış Analizi,MAK,4,guz
+MAK496,Titreşim Analizi,MAK,4,guz
+MAK458,Nanoteknolojiye Giriş,MAK,4,guz
+MEC101,Introduction to Mechanical Engineering,ME,1,guz
+MEC219/205,Thermodynamics I/Thermodynamics,ME,2,guz
+MEC209,Strength of Materials,ME,2,guz
+MEC204,Materials Science,ME,2,guz
+MEC207,Mechanical Lab I,ME,2,guz
+MEC301,Fluid Mechanics,ME,3,guz
+MEC303,Heat Transfer,ME,3,guz
+MEC305,Mechanical Lab II,ME,3,guz
+MEC307,Machine Elements,ME,3,guz
+MEK113,Bilgisayar Programlama I,MEK,1,guz
+MEK111,Mekatronik Mühendisliğine Giriş,MEK,1,guz
+MEK221,Elektronik Devreler,MEK,2,guz
+MEK203,Malzeme Bilimi,MEK,2,guz
+MEK251,Nesne Yönelimli Programlama,MEK,2,guz
+MEK313,Endüstriyel Otomasyon I,MEK,3,guz
+MEK355,Nesne Tabanlı Programla,MEK,3,guz
+MEK480,Bilgisayar Destekli Yapısal Analiz,MEK,4,guz
+MEK405,Robotik,MEK,4,guz
+MEK466,Bilgisayar Destekli Akış ve Isı Analizi,MEK,4,guz
+MEK483,Gömülü Sistemlerin Uygulanması,MEK,4,guz
+MEK401,Mekatronik Sistem Tasarımı,MEK,4,guz
+MEC103,Computer Aided Technical Drawing I,MCE,1,guz
+MCH113,Computer Programming I,MCE,1,guz
+MCH111,Introduction to Mechatronıc Engineering,MCE,1,guz
+MCH251,Object Oriented Programming,MCE,2,guz
+MEC203,Materials Science,MCE,2,guz
+UEE001,Digital Technologies in Health,MCE,2,guz
+MCH221,ELECTRONIC CIRCUITS,MCE,2,guz
+MCH313,Industrıal Automatıon I,MCE,3,guz
+TRD 101,Türk Dili 1,MBG,1,guz
+ING 101,Temel İngilizce 1,MBG,1,guz
+MBG109,Genel Laboratuvar Becerileri,MBG,1,guz
+MBG101,Moleküler Biyolojiye Giriş I,MBG,1,guz
+KIM101,Genel Kimya I,MBG,1,guz
+KIM107,Genel Kimya Lab I,MBG,1,guz
+MBG111,Hücre Biyolojisİ,MBG,1,guz
+MBG215,Fizyoloji,MBG,2,guz
+MBG201,Genetik,MBG,2,guz
+FIZ 101,Fizik I,MBG,2,guz
+KIM201,Analitik Kimya,MBG,2,guz
+KIM211,Analitik Kimya Laboratuvar,MBG,2,guz
+MBG203,Genetik Laboratuvarı,MBG,2,guz
+MBG301,Gen İfadesi Regülasyonu,MBG,3,guz
+MBG305,Biyokimya (Teori),MBG,3,guz
+MBG303,Gelişim Biyolojisi ve Sinyal Yolakları,MBG,3,guz
+MBG307,Biyokimya (Lab),MBG,3,guz
+MBG317,Moleküler Modelleme ve Simülasyon,MBG,3,guz
+MBG309,Genom Veri Bankaları ve Biyoenformatik Araçlar,MBG,3,guz
+MBG411,Biyolojik Harp Ajanları ve Tanı Yöntemleri,MBG,4,guz
+MBG415,Hesaplamalı Biyoloji,MBG,4,guz
+MBG419,Türkiye'nin Biyolojik Zenginlikleri,MBG,4,guz
+MBG405,Seminer,MBG,4,guz
+MBG403,Moleküler Klonlama Teknikleri Laboratuvarı,MBG,4,guz
+MIM121,Mimari Tasarıma Giriş,MIM,1,guz
+MIM123,Teknik Resim I,MIM,1,guz
+MIM127,Mimarlık Tarihi I,MIM,1,guz
+MIM125,Dijital Tasarım I,MIM,1,guz
+MAT103,Matematik,MIM,1,guz
+MIM203,Mimarlık Tarihi II,MIM,2,guz
+MIM201,Mimari Tasarım II,MIM,2,guz
+MIM209,Yapı Teknolojisi II,MIM,2,guz
+MIM257,Kullanıcı Odaklı Tasarım  Uygulamaları,MIM,2,guz
+MIM253,Mimaride Yapay Zeka,MIM,2,guz
+MIM252,Maket-Modelaj,MIM,2,guz
+MIM251,Ahşap Malzeme ve Yapı  Teknikleri,MIM,2,guz
+MIM255,Betonarme Yapılar,MIM,2,guz
+MIM207,Betonarme Yapılar,MIM,2,guz
+MIM205,Dijital Tasarım I,MIM,2,guz
+MIM307,Rölöve,MIM,3,guz
+MIM301,Mimari Tasarım IV,MIM,3,guz
+MIM360,Mimarlıkta Sağlık Odaklı  Tasarım,MIM,3,guz
+MIM359,Koruma Kültürü,MIM,3,guz
+MIM305,Fiziksel Çevre Kontrolü I,MIM,3,guz
+MIM353,Mimari Fotoğrafçılık,MIM,3,guz
+MIM303,Mimarlık Tarihi IV,MIM,3,guz
+MIM351,Dijital Fabrikasyon,MIM,3,guz
+MIM405,İmar Hukuku,MIM,4,guz
+MIM453,Tasarımcı Dili - Kullanıcı Dili,MIM,4,guz
+MIM457,Profesyonel Portfolyo Tasarımı,MIM,4,guz
+MIM403,Uygulama Projesi,MIM,4,guz
+MIM401,Mimari Tasarım VI,MIM,4,guz
+MUH445,Sistematik Tasarım,MIM,4,guz
+KMM101,Kimya Mühendisliğine Giriş,KM,1,guz
+KIM105,Genel Kimya I,KM,1,guz
+KIM203,Organik Kimya I,KM,2,guz
+KIM205,Organik Kimya Laboratuvarı I,KM,2,guz
+KIM207,Fiziksel Kimya I,KM,2,guz
+KIM213,Fiziksel Kimya I,KM,2,guz
+KIM233,Malzeme Bilimi,KM,2,guz
+KIM313,Kimya Mühendisliği Termodinamiği I,KM,3,guz
+KMM313,Kimya Mühendisliği Termodinamiği I,KM,3,guz
+KIM315,Isı Aktarımı,KM,3,guz
+KMM315,Isı Aktarımı,KM,3,guz
+KMM307,Kimyasal Reaksiyon Mühendisliği,KM,3,guz
+KIM317,Laboratuvar ve AR-GE Stajı,KM,3,guz
+KIM351,Mühendislik Ekonomisi,KM,3,guz
+KIM353,Atık Geri Dönüşümü,KM,3,guz
+KMM413,Reaktör Tasarımı,KM,4,guz
+KMM403,Kimya Mühendisliği Proses Tasarımı I,KM,4,guz
+KMM405,Kimya Mühendisliği Laboratuvarı I,KM,4,guz
+KMM407,Proses Dinamiği ve Kontrolu,KM,4,guz
+KMM411,İşletme Stajı,KM,4,guz
+KIM421,Polimer Kimyası,KM,4,guz
+KIM423,İlaç Üretim Teknolojileri,KM,4,guz
+KIM413,Enstrümental Analiz,KM,4,guz
+CHE101,Introduction to Chemical Engineering,CHE,1,guz
+CHM101,General Chemistry I,CHE,1,guz
+CHM105,General Chemistry I,CHE,1,guz
+CHM107,General Chemistry Laboratory I,CHE,1,guz
+CHM201,Analytical Chemistry,CHE,2,guz
+CHM211,Analytical Chemistry Laboratory,CHE,2,guz
+CHM203,Organic Chemistry I,CHE,2,guz
+CHM205,Organic Chemistry Laboratory I,CHE,2,guz
+CHM213,Physical Chemistry I,CHE,2,guz
+CHM215,Materials Science,CHE,2,guz
+CHE303,Chemical Engineering Thermodynamics I,CHE,3,guz
+CHE306,Heat Transfer,CHE,3,guz
+CHE313,Heat Transfer,CHE,3,guz
+CHE307,Chemical Reaction Engineering,CHE,3,guz
+CHE311,Laboratory and R&D Internship,CHE,3,guz
+CHM351,Engineering Economics,CHE,3,guz
+CHM353,Waste Recycling,CHE,3,guz
+CHE413,Reactor Design,CHE,4,guz
+CHE403,Chemical Engineering Process Design I,CHE,4,guz
+CHE405,Chemical Engineering Laboratory I,CHE,4,guz
+CHE407,Process Dynamics and Control,CHE,4,guz
+CHE411,Business Internship,CHE,4,guz
+CHM421,Polymer Chemistry,CHE,4,guz
+CHM423,Pharmaceutical Manufacturing Technologies,CHE,4,guz
+CHM413,Instrumental Analysis,CHE,4,guz
+YAZ101,Yazılım Mühendisliğine Giriş,YM,1,guz
+YAZ213,İnsan Bilgisayar Etkileşimi,YM,2,guz
+BYM445,Görüntü İşleme,YM,2,guz
+YAZ305,Yazılım Proje Yönetimi,YM,3,guz
+BYM463,E-ticaret,YM,4,guz
+BYM468,Kriptografi,YM,4,guz
+BYM403,Yazılım Geliştirme için İş Süreç Modelleme,YM,4,guz
+YAZ401,Yazılım Kalite Standartları,YM,4,guz
+SWE101,Introduction to Software Engineering,SE,1,guz
+SWE213,Human Computer Interactions,SE,2,guz
+CSE445,İmage Proccesing,SE,2,guz
+SWE305,Software Project Management,SE,3,guz
+SWE401,Software Quality Standards,SE,4,guz
